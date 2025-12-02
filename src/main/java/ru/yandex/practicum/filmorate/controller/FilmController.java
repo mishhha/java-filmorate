@@ -42,16 +42,43 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(Film film) {
+    public Film updateFilm(@RequestBody Film film) {
         Film oldFilm = films.get(film.getId());
-        oldFilm.setName(film.getName());
-        oldFilm.setDescription(film.getDescription());
-        oldFilm.setReleaseDate(film.getReleaseDate());
-        oldFilm.setDuration(film.getDuration());
+        Film newFilm = new Film();
 
-        films.put(oldFilm.getId(), oldFilm);
+        newFilm.setId(oldFilm.getId());
 
-        return oldFilm;
+        if(film.getName() == null) {
+            newFilm.setName(oldFilm.getName());
+        } else {
+            newFilm.setName(film.getName());
+        }
+
+        if(film.getDescription() == null) {
+            newFilm.setDescription(oldFilm.getDescription());
+        } else {
+            newFilm.setDescription(film.getDescription());
+        }
+
+        if(film.getReleaseDate() == null) {
+            newFilm.setReleaseDate(oldFilm.getReleaseDate());
+        } else if(!film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
+            newFilm.setReleaseDate(film.getReleaseDate());
+        } else {
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
+
+        if(film.getDuration() == null) {
+            newFilm.setDuration(oldFilm.getDuration());
+        } else if (film.getDuration().toMinutes() > 0) {
+            newFilm.setDuration(film.getDuration());
+        } else {
+            throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
+        }
+
+        films.put(newFilm.getId(), newFilm);
+
+        return newFilm;
     }
 
     @GetMapping
