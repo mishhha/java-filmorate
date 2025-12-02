@@ -14,6 +14,9 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@RequestBody Film film) {
+        if(film.getName() == null) {
+
+        }
         Film newFilm = new Film();
         newFilm.setId(nextIdGenerate());
         newFilm.setName(film.getName());
