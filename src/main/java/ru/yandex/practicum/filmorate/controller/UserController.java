@@ -63,7 +63,7 @@ public class UserController {
 
         newUser.setId(oldUser.getId());
 
-        if(user.getName() == null) {
+        if (user.getName() == null) {
             newUser.setName(oldUser.getName());
         } else {
             newUser.setName(user.getName());
@@ -71,7 +71,7 @@ public class UserController {
 
         if (user.getEmail() == null) {
             newUser.setEmail(oldUser.getEmail());
-        } else if(user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        } else if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.warn("Пользователь {} указал неверный email {} при редактировании.", user.getName(), user.getEmail());
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         } else {
