@@ -1,13 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +12,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RestController
+@RequestMapping("/users")
 public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
@@ -28,13 +26,13 @@ public class UserController {
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
 
-        if(user.getLogin() == null || user.getLogin().contains(" ") || user.getLogin().isBlank()) {
+        if(user.getLogin() == null || user.getLogin().isBlank()) {
             log.warn("Пользователь {} указал неверный логин {} при регистрации.", user.getName(), user.getLogin());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
 
         User newUser = new User();
-        if(user.getName() == null || user.getName().isBlank() || user.getName().contains(" ")) {
+        if(user.getName() == null || user.getName().isBlank()) {
             log.warn("Пользователю {} назначено имя {} при регистрации.", user.getName(), user.getLogin());
             newUser.setName(user.getLogin());
         }
@@ -82,7 +80,7 @@ public class UserController {
 
         if(user.getLogin() == null) {
             newUser.setLogin(oldUser.getLogin());
-        } else if(user.getLogin().contains(" ") || user.getLogin().isBlank()) {
+        } else if(user.getLogin().isBlank()) {
             log.warn("Пользователь {} указал неверный логин {} при редактировании.", user.getName(), user.getLogin());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         } else {
