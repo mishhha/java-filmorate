@@ -73,7 +73,7 @@ public class FilmController {
 
         if (film.getReleaseDate() == null) {
             newFilm.setReleaseDate(oldFilm.getReleaseDate());
-        } else if(film.getReleaseDate().isAfter(MIN_DATE_RELEASE)) {
+        } else if (film.getReleaseDate().isAfter(MIN_DATE_RELEASE)) {
             newFilm.setReleaseDate(film.getReleaseDate());
         } else {
             log.warn("Неверная дата релиза фильма {}, при обновлении, {}", film.getName(), film.getReleaseDate());
