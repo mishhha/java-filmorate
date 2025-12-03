@@ -21,23 +21,23 @@ public class UserController {
 
     @PostMapping
     public User addUser(@RequestBody User user) {
-        if(user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.warn("Пользователь {} указал неверный email {} при регистрации.", user.getName(), user.getEmail());
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
 
-        if(user.getLogin() == null || user.getLogin().isBlank()) {
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
             log.warn("Пользователь {} указал неверный логин {} при регистрации.", user.getName(), user.getLogin());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         }
 
         User newUser = new User();
-        if(user.getName() == null || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             log.warn("Пользователю {} назначено имя {} при регистрации.", user.getName(), user.getLogin());
             newUser.setName(user.getLogin());
         }
 
-        if(user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             log.warn("Пользователь {} указал неверную дату рождения {} при регистрации.",
                         user.getName(), user.getBirthday());
             throw new ValidationException("Дата рождения не может быть в будущем.");
@@ -46,7 +46,7 @@ public class UserController {
         newUser.setId(nextIdGenerate());
         newUser.setEmail(user.getEmail());
         newUser.setLogin(user.getLogin());
-        if(newUser.getName() == null) {
+        if (newUser.getName() == null) {
             newUser.setName(user.getName());
         }
         newUser.setBirthday(user.getBirthday());
@@ -69,7 +69,7 @@ public class UserController {
             newUser.setName(user.getName());
         }
 
-        if(user.getEmail() == null) {
+        if (user.getEmail() == null) {
             newUser.setEmail(oldUser.getEmail());
         } else if(user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.warn("Пользователь {} указал неверный email {} при редактировании.", user.getName(), user.getEmail());
@@ -78,18 +78,18 @@ public class UserController {
             newUser.setEmail(user.getEmail());
         }
 
-        if(user.getLogin() == null) {
+        if (user.getLogin() == null) {
             newUser.setLogin(oldUser.getLogin());
-        } else if(user.getLogin().isBlank()) {
+        } else if (user.getLogin().isBlank()) {
             log.warn("Пользователь {} указал неверный логин {} при редактировании.", user.getName(), user.getLogin());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         } else {
             newUser.setLogin(user.getLogin());
         }
 
-        if(user.getBirthday() == null) {
+        if (user.getBirthday() == null) {
             newUser.setBirthday(oldUser.getBirthday());
-        } else if(user.getBirthday().isAfter(LocalDate.now())) {
+        } else if (user.getBirthday().isAfter(LocalDate.now())) {
             log.warn("Пользователь {} указал неверную дату рождения {} при редактировании.",
                 user.getName(), user.getBirthday());
             throw new ValidationException("Дата рождения не может быть в будущем.");

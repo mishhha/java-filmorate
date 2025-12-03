@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -16,27 +15,27 @@ import org.slf4j.Logger;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
+    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     private static final LocalDate MIN_DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private final HashMap<Long, Film> films = new HashMap<>();
 
     @PostMapping
     public Film addFilm(@RequestBody Film film) {
-        if(film.getName() == null || film.getName().isBlank()) {
+        if (film.getName() == null || film.getName().isBlank()) {
             log.warn("Указанное некорректное имя фильма {} при создании.", "<пусто>");
             throw new ValidationException("Название не может быть пустым");
         }
-        if(film.getDescription().length() > 200) {
+        if (film.getDescription().length() > 200) {
             log.warn("Превышена длинна описания {} при создании.", film.getDescription().length());
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
-        if(film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
+        if (film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
             log.warn("Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
                         film.getReleaseDate());
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
-        if(film.getDuration() <= 0) {
+        if (film.getDuration() <= 0) {
             log.warn("Продолжительность отрицательная {} при создании.", film.getDescription().length());
             throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
         }
@@ -60,19 +59,19 @@ public class FilmController {
 
         newFilm.setId(oldFilm.getId());
 
-        if(film.getName() == null) {
+        if (film.getName() == null) {
             newFilm.setName(oldFilm.getName());
         } else {
             newFilm.setName(film.getName());
         }
 
-        if(film.getDescription() == null) {
+        if (film.getDescription() == null) {
             newFilm.setDescription(oldFilm.getDescription());
         } else {
             newFilm.setDescription(film.getDescription());
         }
 
-        if(film.getReleaseDate() == null) {
+        if (film.getReleaseDate() == null) {
             newFilm.setReleaseDate(oldFilm.getReleaseDate());
         } else if(film.getReleaseDate().isAfter(MIN_DATE_RELEASE)) {
             newFilm.setReleaseDate(film.getReleaseDate());
@@ -81,7 +80,7 @@ public class FilmController {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
 
-        if(film.getDuration() == 0) {
+        if (film.getDuration() == 0) {
             newFilm.setDuration(oldFilm.getDuration());
         } else if (film.getDuration() > 0) {
             newFilm.setDuration(film.getDuration());
