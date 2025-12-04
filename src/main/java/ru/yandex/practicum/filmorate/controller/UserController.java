@@ -27,12 +27,6 @@ public class UserController {
             newUser.setName(user.getLogin());
         }
 
-        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Пользователь {} указал неверную дату рождения {} при регистрации.",
-                        user.getName(), user.getBirthday());
-            throw new ValidationException("Дата рождения не может быть в будущем.");
-        }
-
         newUser.setId(nextIdGenerate());
         newUser.setEmail(user.getEmail());
         newUser.setLogin(user.getLogin());
