@@ -31,7 +31,7 @@ public class UserController {
         newUser.setEmail(user.getEmail());
         newUser.setLogin(user.getLogin());
         if (newUser.getName() == null) {
-            newUser.setName(user.getName());
+            newUser.setName(user.getLogin());
         }
         newUser.setBirthday(user.getBirthday());
 
