@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,7 @@ public class UserController {
         newUser.setEmail(user.getEmail());
         newUser.setLogin(user.getLogin());
         if (newUser.getName() == null) {
-            newUser.setName(user.getLogin());
+            newUser.setName(user.getName());
         }
         newUser.setBirthday(user.getBirthday());
 
@@ -41,45 +40,23 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody @Valid User user) {
         User oldUser = users.get(user.getId());
+        if (oldUser == null) {
+            log.warn("Пользователь с id {} не найден в базе.", user.getId());
+            throw new ValidationException("Пользователя не найден");
+        }
         User newUser = new User();
 
         newUser.setId(oldUser.getId());
-
+        newUser.setEmail(user.getEmail());
+        newUser.setLogin(user.getLogin());
         if (user.getName() == null) {
-            newUser.setName(oldUser.getName());
+            newUser.setName(user.getLogin());
         } else {
             newUser.setName(user.getName());
         }
-
-        if (user.getEmail() == null) {
-            newUser.setEmail(oldUser.getEmail());
-        } else if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("Пользователь {} указал неверный email {} при редактировании.", user.getName(), user.getEmail());
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        } else {
-            newUser.setEmail(user.getEmail());
-        }
-
-        if (user.getLogin() == null) {
-            newUser.setLogin(oldUser.getLogin());
-        } else if (user.getLogin().isBlank()) {
-            log.warn("Пользователь {} указал неверный логин {} при редактировании.", user.getName(), user.getLogin());
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-        } else {
-            newUser.setLogin(user.getLogin());
-        }
-
-        if (user.getBirthday() == null) {
-            newUser.setBirthday(oldUser.getBirthday());
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Пользователь {} указал неверную дату рождения {} при редактировании.",
-                user.getName(), user.getBirthday());
-            throw new ValidationException("Дата рождения не может быть в будущем.");
-        } else {
-            newUser.setBirthday(user.getBirthday());
-        }
+        newUser.setBirthday(user.getBirthday());
 
         users.put(newUser.getId(), newUser);
         log.info("Пользователь с именем {} и логином {} обновил свой профиль.", user.getName(), user.getLogin());

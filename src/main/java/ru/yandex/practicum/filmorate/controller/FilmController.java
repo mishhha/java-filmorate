@@ -30,10 +30,7 @@ public class FilmController {
                         film.getReleaseDate());
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
-        if (film.getDuration() <= 0) {
-            log.warn("Продолжительность отрицательная {} при создании.", film.getDescription().length());
-            throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
-        }
+
         Film newFilm = new Film();
         newFilm.setId(nextIdGenerate());
         newFilm.setName(film.getName());
@@ -50,40 +47,17 @@ public class FilmController {
     public Film updateFilm(@RequestBody Film film) {
 
         Film oldFilm = films.get(film.getId());
+        if (oldFilm == null) {
+            log.warn("Фильм с id {} не найден", film.getId());
+            throw new ValidationException("Такой фильм не найден");
+        }
         Film newFilm = new Film();
 
         newFilm.setId(oldFilm.getId());
-
-        if (film.getName() == null) {
-            newFilm.setName(oldFilm.getName());
-        } else {
-            newFilm.setName(film.getName());
-        }
-
-        if (film.getDescription() == null) {
-            newFilm.setDescription(oldFilm.getDescription());
-        } else {
-            newFilm.setDescription(film.getDescription());
-        }
-
-        if (film.getReleaseDate() == null) {
-            newFilm.setReleaseDate(oldFilm.getReleaseDate());
-        } else if (film.getReleaseDate().isAfter(MIN_DATE_RELEASE)) {
-            newFilm.setReleaseDate(film.getReleaseDate());
-        } else {
-            log.warn("Неверная дата релиза фильма {}, при обновлении, {}", film.getName(), film.getReleaseDate());
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-
-        if (film.getDuration() == 0) {
-            newFilm.setDuration(oldFilm.getDuration());
-        } else if (film.getDuration() > 0) {
-            newFilm.setDuration(film.getDuration());
-        } else {
-            log.warn("Отрицательная продолжительность фильма {}, указали {} при обновлении",
-                        film.getName(), film.getDuration());
-            throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
-        }
+        newFilm.setName(film.getName());
+        newFilm.setDescription(film.getDescription());
+        newFilm.setReleaseDate(film.getReleaseDate());
+        newFilm.setDuration(film.getDuration());
 
         films.put(newFilm.getId(), newFilm);
             log.info("Фильм {} обновлен.", film.getName());

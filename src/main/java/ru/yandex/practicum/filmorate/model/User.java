@@ -16,7 +16,6 @@ public class User {
     @NotBlank(message = "Логин не может быть пустой")
     String login;
     String name;
-    @NotBlank
     @Past(message = "Дата рождения не может быть в прошлом")
     LocalDate birthday;
 }
