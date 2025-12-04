@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -18,16 +19,7 @@ public class UserController {
     private final HashMap<Long, User> users = new HashMap<>();
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("Пользователь {} указал неверный email {} при регистрации.", user.getName(), user.getEmail());
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-
-        if (user.getLogin() == null || user.getLogin().isBlank()) {
-            log.warn("Пользователь {} указал неверный логин {} при регистрации.", user.getName(), user.getLogin());
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-        }
+    public User addUser(@RequestBody @Valid User user) {
 
         User newUser = new User();
         if (user.getName() == null || user.getName().isBlank()) {

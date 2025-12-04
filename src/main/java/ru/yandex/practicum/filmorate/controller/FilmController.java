@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -19,11 +20,7 @@ public class FilmController {
     private final HashMap<Long, Film> films = new HashMap<>();
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film) {
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.warn("Указанное некорректное имя фильма {} при создании.", "<пусто>");
-            throw new ValidationException("Название не может быть пустым");
-        }
+    public Film addFilm(@RequestBody @Valid Film film) {
         if (film.getDescription().length() > 200) {
             log.warn("Превышена длинна описания {} при создании.", film.getDescription().length());
             throw new ValidationException("Максимальная длина описания — 200 символов");
