@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
 @Slf4j
 @RestController
 @RequestMapping("/films")
