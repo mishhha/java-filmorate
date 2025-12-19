@@ -22,12 +22,17 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@RequestBody @Valid Film film) {
         if (film.getDescription().length() > 200) {
-            log.warn("Превышена длинна описания {} при создании.", film.getDescription().length());
+            log.warn(
+                "Превышена длина описания {} при создании.",
+                film.getDescription().length()
+            );
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
-            log.warn("Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
-                        film.getReleaseDate());
+            log.warn(
+                "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
+                film.getReleaseDate()
+            );
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
 
