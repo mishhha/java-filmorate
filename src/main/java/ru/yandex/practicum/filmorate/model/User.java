@@ -6,16 +6,24 @@ import jakarta.validation.constraints.Past;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class User {
-    Long id;
+    private Long id;
     @Email(message = "Некорректный ввод почты")
     @NotBlank(message = "Почта не может быть пустой")
-    String email;
+    private String email;
     @NotBlank(message = "Логин не может быть пустой")
-    String login;
-    String name;
+    private String login;
+    private String name;
     @Past(message = "Дата рождения не может быть в прошлом")
-    LocalDate birthday;
+    private LocalDate birthday;
+    private Set<Long> friendList;
+    private Set<Long> likesFilms;
+
+    public void addFriend(long id) {
+        friendList.add(id);
+    }
+
 }
