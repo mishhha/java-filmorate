@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -23,7 +24,18 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Film getFilmById(Long id) {
+        return films.get(id);
+    }
+
+    @Override
     public Film addFilm(Film film) {
+        if(film.getName().isBlank()) {
+            throw new ValidationException("Имя фильма не может быть пустым.");
+        }
+        if(film.getDuration() <= 0) {
+            throw new ValidationException("Продолжительность фильма не может быть отрицательной.");
+        }
         if (film.getDescription().length() > 200) {
             log.warn(
                 "Превышена длина описания {} при создании.",
@@ -57,7 +69,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film oldFilm = films.get(film.getId());
         if (oldFilm == null) {
             log.warn("Фильм с id {} не найден", film.getId());
-            throw new ValidationException("Такой фильм не найден");
+            throw new NotFoundException("Такой фильм не найден");
         }
         Film newFilm = new Film();
 

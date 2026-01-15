@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Past;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -17,13 +18,21 @@ public class User {
     @NotBlank(message = "Логин не может быть пустой")
     private String login;
     private String name;
-    @Past(message = "Дата рождения не может быть в прошлом")
+    @Past(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
-    private Set<Long> friendList;
-    private Set<Long> likesFilms;
+    private Set<Long> friendList = new HashSet<Long>();
+    private Set<Long> likesFilms = new HashSet<Long>();
 
-    public void addFriend(long id) {
+    public void addFriend(Long id) {
         friendList.add(id);
+    }
+
+    public void deleteFromFriends(Long id) {
+        friendList.remove(id);
+    }
+
+    public void addLikesFilms(Long id) {
+        likesFilms.add(id);
     }
 
 }

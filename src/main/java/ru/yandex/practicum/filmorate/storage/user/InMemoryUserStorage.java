@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -43,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
         User oldUser = users.get(user.getId());
         if (oldUser == null) {
             log.warn("Пользователь с id {} не найден в базе.", user.getId());
-            throw new ValidationException("Пользователя не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         User newUser = new User();
 
@@ -67,6 +65,70 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(users.values());
     }
 
+    @Override
+    public User getUserById(Long id) {
+        User user = users.get(id);
+        return user;
+    }
+
+    @Override
+    public List<User> getFriends(Long id) {
+
+        User user = users.get(id);
+        if(user == null) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+        Set<Long> getFriendId = user.getFriendList();
+
+        return getFriendId.stream()
+            .map(users::get)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    @Override
+    public User deleteFriend(Long idUser, Long idFriend) {
+        User user = users.get(idUser);
+        if(user == null) {
+            throw new NotFoundException("Пользователь c ID: " + idUser + " не найден.");
+        }
+        user.deleteFromFriends(idFriend);
+
+        User userFriend = users.get(idFriend);
+        if(userFriend == null) {
+            throw new NotFoundException("Пользователь c ID: " + idFriend + " не найден.");
+        }
+        userFriend.deleteFromFriends(idUser);
+        return users.get(idFriend);
+    }
+
+    @Override
+    public User addFriendById(Long idUser, Long idFriend) {
+        User user = users.get(idUser);
+        if(user == null) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+        user.addFriend(idFriend);
+        User userFriend = users.get(idFriend);
+        if(userFriend == null) {
+            throw new NotFoundException("Пользователь друг не найден.");
+        }
+        userFriend.addFriend(idUser);
+        return userFriend;
+    }
+
+    @Override
+    public List<User> getCommonFriends(Long id, Long otherId) {
+
+        Set<Long> otherFriendList = users.get(otherId).getFriendList();
+
+        return users.get(id).getFriendList().stream()
+            .filter(otherFriendList::contains)
+            .map(users::get)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+    }
 
     public long nextIdGenerate() {
         long nextId = users.keySet().stream()
