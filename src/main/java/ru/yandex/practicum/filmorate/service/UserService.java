@@ -21,7 +21,7 @@ public class UserService {
 
     public void addFriend(long idFriend, User initiator) {
 
-        if(initiator.getFriendList().contains(idFriend)) {
+        if (initiator.getFriendList().contains(idFriend)) {
             throw new ValidationException("Такой пользователь уже есть в друзьях");
         }
 
