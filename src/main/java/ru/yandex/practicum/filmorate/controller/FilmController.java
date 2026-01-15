@@ -45,7 +45,7 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        if(id <= 0 || userId <= 0) {
+        if (id <= 0 || userId <= 0) {
             throw new ValidationException(
                 "Передаваемые значения должны быть положительными. " +
                     "<" + id + "> " +
@@ -58,7 +58,7 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void disLike(@PathVariable Long id, @PathVariable Long userId) {
-        if(id <= 0 || userId <= 0) {
+        if (id <= 0 || userId <= 0) {
             throw new ValidationException(
                 "Передаваемые значения должны быть положительными. " +
                     "<" + id + "> " +
@@ -70,7 +70,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") int count) {
-        if(count <= 0) {
+        if (count <= 0) {
             throw new ValidationException(
                 "Передаваемые значения должны быть положительными. " +
                     "<" + count + ">"

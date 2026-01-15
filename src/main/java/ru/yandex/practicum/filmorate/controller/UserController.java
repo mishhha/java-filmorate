@@ -48,7 +48,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends")
     public List<User> getFriendsById(@PathVariable Long id) {
-        if(id <= 0) {
+        if (id <= 0) {
             throw new ValidationException(
                 "ID пользователя должен быть положительный " +
                     "<" + id + ">."
@@ -59,7 +59,7 @@ public class UserController {
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public User deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        if(id <= 0 || friendId <= 0) {
+        if (id <= 0 || friendId <= 0) {
             throw new ValidationException(
                 "ID пользователя и ID друга должен быть положительными " +
                     "<" + id + ">" + "<" + friendId + ">"
@@ -71,7 +71,7 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
     public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        if(id <= 0 || friendId <= 0) {
+        if (id <= 0 || friendId <= 0) {
             throw new ValidationException(
                 "ID пользователя и ID друга должен быть положительными " +
                     "<" + id + ">" + "<" + friendId + ">"
@@ -82,7 +82,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriend(@PathVariable Long id, @PathVariable Long otherId) {
-        if(id <= 0 || otherId <= 0) {
+        if (id <= 0 || otherId <= 0) {
             throw new ValidationException(
                 "ID пользователя и ID друга должен быть положительными " +
                     "<" + id + ">" + "<" + otherId + ">"

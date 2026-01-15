@@ -29,7 +29,7 @@ public class UserService {
             .filter(user -> user.getId() == idFriend)
             .findFirst();
 
-        if(userCheck.isPresent()) {
+        if (userCheck.isPresent()) {
             User fromStorage = userCheck.get();
             initiator.addFriend(fromStorage.getId());
             fromStorage.addFriend(initiator.getId());
@@ -39,7 +39,7 @@ public class UserService {
 
     public void removeFriend(long idFriend, User initiator) {
 
-        if(!initiator.getFriendList().contains(idFriend)) {
+        if (!initiator.getFriendList().contains(idFriend)) {
             throw new ValidationException("Такого пользователя нет в друзьях");
         }
 
@@ -49,7 +49,7 @@ public class UserService {
             .filter(user -> user.getId() == idFriend)
             .findFirst();
 
-        if(userCheck.isPresent()) {
+        if (userCheck.isPresent()) {
             User fromStorage = userCheck.get();
             fromStorage.getFriendList().remove(initiator.getId());
         }

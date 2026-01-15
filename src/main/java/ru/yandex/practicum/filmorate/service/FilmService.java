@@ -28,7 +28,7 @@ public class FilmService {
 
     public void addLike(Long idFilm) {
         Film film = storage.getFilmById(idFilm);
-        if(film == null) {
+        if (film == null) {
             throw new NotFoundException("Фильм с таким ID: " + idFilm + " не найден.");
         }
         film.addLike();
@@ -36,7 +36,7 @@ public class FilmService {
 
     public void disLike(Long idFilm) {
         Film film = storage.getFilmById(idFilm);
-        if(film == null) {
+        if (film == null) {
             throw new NotFoundException("Фильм с таким ID: " + idFilm + " не найден.");
         }
         film.dislike();
@@ -44,7 +44,7 @@ public class FilmService {
 
     public void userLikesFilm(Long id, Long userId) {
         User user = userStorage.getUserById(userId);
-        if(user == null) {
+        if (user == null) {
             throw new NotFoundException("Пользователь с таким ID не найден.");
         }
         user.addLikesFilms(id);
@@ -53,7 +53,7 @@ public class FilmService {
 
     public void userDislikesFilm(Long id, Long userId) {
         User user = userStorage.getUserById(userId);
-        if(user == null) {
+        if (user == null) {
             throw new NotFoundException("Пользователь с таким ID не найден.");
         }
         user.getLikesFilms().remove(id);
@@ -64,7 +64,7 @@ public class FilmService {
         List<Film> listFilms = storage.getFilms();
         listFilms.sort(Comparator.comparing(Film::getLikes).reversed());
         int sizeList = listFilms.size();
-        if(sizeList < count) {
+        if (sizeList < count) {
             return new ArrayList<>(listFilms.subList(0, sizeList));
         }
         return new ArrayList<>(listFilms.subList(0,count));
