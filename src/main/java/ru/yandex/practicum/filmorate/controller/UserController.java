@@ -93,7 +93,7 @@ public class UserController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorHandler.ErrorResponse handlerValidation (final ValidationException e) {
+    public ErrorHandler.ErrorResponse handlerValidation(final ValidationException e) {
         return new ErrorHandler.ErrorResponse("Ошибка валидации данных");
     }
 
