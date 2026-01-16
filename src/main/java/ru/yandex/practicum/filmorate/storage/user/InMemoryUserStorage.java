@@ -95,7 +95,7 @@ public class InMemoryUserStorage implements UserStorage {
         user.deleteFromFriends(idFriend);
 
         User userFriend = users.get(idFriend);
-        if(userFriend == null) {
+        if (userFriend == null) {
             throw new NotFoundException("Пользователь c ID: " + idFriend + " не найден.");
         }
         userFriend.deleteFromFriends(idUser);
