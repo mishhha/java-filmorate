@@ -75,7 +75,7 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> getFriends(Long id) {
 
         User user = users.get(id);
-        if(user == null) {
+        if (user == null) {
             throw new NotFoundException("Пользователь не найден.");
         }
         Set<Long> getFriendId = user.getFriendList();
@@ -89,7 +89,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User deleteFriend(Long idUser, Long idFriend) {
         User user = users.get(idUser);
-        if(user == null) {
+        if (user == null) {
             throw new NotFoundException("Пользователь c ID: " + idUser + " не найден.");
         }
         user.deleteFromFriends(idFriend);
@@ -105,12 +105,12 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addFriendById(Long idUser, Long idFriend) {
         User user = users.get(idUser);
-        if(user == null) {
+        if (user == null) {
             throw new NotFoundException("Пользователь не найден.");
         }
         user.addFriend(idFriend);
         User userFriend = users.get(idFriend);
-        if(userFriend == null) {
+        if (userFriend == null) {
             throw new NotFoundException("Пользователь друг не найден.");
         }
         userFriend.addFriend(idUser);

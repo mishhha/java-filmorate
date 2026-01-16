@@ -33,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if(film.getName().isBlank()) {
             throw new ValidationException("Имя фильма не может быть пустым.");
         }
-        if(film.getDuration() <= 0) {
+        if (film.getDuration() <= 0) {
             throw new ValidationException("Продолжительность фильма не может быть отрицательной.");
         }
         if (film.getDescription().length() > 200) {
