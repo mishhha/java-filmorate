@@ -30,7 +30,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        if(film.getName().isBlank()) {
+        if (film.getName().isBlank()) {
             throw new ValidationException("Имя фильма не может быть пустым.");
         }
         if (film.getDuration() <= 0) {
