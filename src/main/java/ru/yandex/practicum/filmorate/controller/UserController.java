@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -89,26 +87,6 @@ public class UserController {
             );
         }
         return userStorage.getCommonFriends(id, otherId);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorHandler.ErrorResponse handlerValidation(final ValidationException e) {
-        return new ErrorHandler.ErrorResponse("Ошибка валидации данных");
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorHandler.ErrorResponse handlerNotFound(final NotFoundException e) {
-        return new ErrorHandler.ErrorResponse("Запрашиваемые данные не найдены");
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorHandler.ErrorResponse handlerServerException(final Throwable e) {
-        return new ErrorHandler.ErrorResponse(
-            "Произошла непредвиденная ошибка." + e.getMessage()
-        );
     }
 
 }
