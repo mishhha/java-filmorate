@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -7,35 +8,34 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
 
 @Slf4j
+@Data
 @RestController
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
 
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@RequestBody Film film) {
-        return filmStorage.addFilm(film);
+        return filmService.getFilmStorage().addFilm(film);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Film updateFilm(@RequestBody Film film) {
-        return filmStorage.updateFilm(film);
+        return filmService.getFilmStorage().updateFilm(film);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmService.getFilmStorage().getFilms();
     }
 
     @PutMapping("/{id}/like/{userId}")

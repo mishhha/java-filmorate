@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Data;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,9 +12,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Data
 public class UserService {
 
-    InMemoryUserStorage userStorage;
+    private final InMemoryUserStorage userStorage;
 
     public UserService(InMemoryUserStorage userStorage) {
         this.userStorage = userStorage;

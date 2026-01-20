@@ -1,47 +1,44 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    UserStorage userStorage;
-
-    @Autowired
-    public UserController(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User addUser(@RequestBody @Valid User user) {
-        return userStorage.addUser(user);
+        return userService.getUserStorage().addUser(user);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public User updateUser(@RequestBody @Valid User user) {
-        return userStorage.updateUser(user);
+        return userService.getUserStorage().updateUser(user);
     }
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return userService.getUserStorage().getUsers();
     }
 
     @GetMapping("/{id}")
     public User getUsersById(@PathVariable Long id) {
-        return userStorage.getUserById(id);
+        return userService.getUserStorage().getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
@@ -52,7 +49,7 @@ public class UserController {
                     "<" + id + ">."
                 );
         }
-        return userStorage.getFriends(id);
+        return userService.getUserStorage().getFriends(id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
@@ -63,7 +60,7 @@ public class UserController {
                     "<" + id + ">" + "<" + friendId + ">"
             );
         }
-        return userStorage.deleteFriend(id, friendId);
+        return userService.getUserStorage().deleteFriend(id, friendId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -75,7 +72,7 @@ public class UserController {
                     "<" + id + ">" + "<" + friendId + ">"
             );
         }
-        return userStorage.addFriendById(id, friendId);
+        return userService.getUserStorage().addFriendById(id, friendId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
@@ -86,7 +83,7 @@ public class UserController {
                     "<" + id + ">" + "<" + otherId + ">"
             );
         }
-        return userStorage.getCommonFriends(id, otherId);
+        return userService.getUserStorage().getCommonFriends(id, otherId);
     }
 
 }

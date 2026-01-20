@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -15,19 +17,15 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Data
+@RequiredArgsConstructor
 public class FilmService {
 
-    FilmStorage storage;
-    UserStorage userStorage;
-
-    @Autowired
-    public FilmService(InMemoryFilmStorage storage, InMemoryUserStorage userStorage) {
-        this.storage = storage;
-        this.userStorage = userStorage;
-    }
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     public void addLike(Long idFilm) {
-        Film film = storage.getFilmById(idFilm);
+        Film film = filmStorage.getFilmById(idFilm);
         if (film == null) {
             throw new NotFoundException("Фильм с таким ID: " + idFilm + " не найден.");
         }
@@ -35,7 +33,7 @@ public class FilmService {
     }
 
     public void disLike(Long idFilm) {
-        Film film = storage.getFilmById(idFilm);
+        Film film = filmStorage.getFilmById(idFilm);
         if (film == null) {
             throw new NotFoundException("Фильм с таким ID: " + idFilm + " не найден.");
         }
@@ -61,7 +59,7 @@ public class FilmService {
     }
 
     public List<Film> getTopFilmsByLikes(int count) {
-        List<Film> listFilms = storage.getFilms();
+        List<Film> listFilms = filmStorage.getFilms();
         listFilms.sort(Comparator.comparing(Film::getLikes).reversed());
         int sizeList = listFilms.size();
         if (sizeList < count) {
