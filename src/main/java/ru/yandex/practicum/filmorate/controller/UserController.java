@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -10,6 +12,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -41,13 +44,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriendsById(@PathVariable Long id) {
-        if (id <= 0) {
-            throw new ValidationException(
-                "ID пользователя должен быть положительный " +
-                    "<" + id + ">."
-                );
-        }
+    public List<User> getFriendsById(@PathVariable @PositiveOrZero Long id) {
         return userService.getFriends(id);
     }
 
