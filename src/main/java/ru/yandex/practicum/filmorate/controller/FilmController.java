@@ -23,19 +23,19 @@ public class FilmController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@RequestBody Film film) {
-        return filmService.getFilmStorage().addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Film updateFilm(@RequestBody Film film) {
-        return filmService.getFilmStorage().updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-        return filmService.getFilmStorage().getFilms();
+        return filmService.getFilms();
     }
 
     @PutMapping("/{id}/like/{userId}")

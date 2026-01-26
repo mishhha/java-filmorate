@@ -103,7 +103,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addFriendById(Long idUser, Long idFriend) {
+    public User addFriend(Long idUser, Long idFriend) {
         User user = users.get(idUser);
         if (user == null) {
             throw new NotFoundException("Пользователь не найден.");
