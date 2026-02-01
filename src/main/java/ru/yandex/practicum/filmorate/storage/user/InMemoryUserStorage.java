@@ -16,48 +16,16 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-
-        User newUser = new User();
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.warn("Пользователю {} назначено имя {} при регистрации.", user.getName(), user.getLogin());
-            newUser.setName(user.getLogin());
-        }
-
-        newUser.setId(nextIdGenerate());
-        newUser.setEmail(user.getEmail());
-        newUser.setLogin(user.getLogin());
-        if (newUser.getName() == null) {
-            newUser.setName(user.getName());
-        }
-        newUser.setBirthday(user.getBirthday());
-
-        users.put(newUser.getId(), newUser);
+        users.put(user.getId(), user);
         log.info("Пользователь с именем {} и логином {} зарегистрирован.", user.getName(), user.getLogin());
-        return newUser;
+        return user;
     }
 
     @Override
     public User updateUser(User user) {
-        User oldUser = users.get(user.getId());
-        if (oldUser == null) {
-            log.warn("Пользователь с id {} не найден в базе.", user.getId());
-            throw new NotFoundException("Пользователь не найден");
-        }
-        User newUser = new User();
-
-        newUser.setId(oldUser.getId());
-        newUser.setEmail(user.getEmail());
-        newUser.setLogin(user.getLogin());
-        if (user.getName() == null) {
-            newUser.setName(user.getLogin());
-        } else {
-            newUser.setName(user.getName());
-        }
-        newUser.setBirthday(user.getBirthday());
-
-        users.put(newUser.getId(), newUser);
+        users.put(user.getId(), user);
         log.info("Пользователь с именем {} и логином {} обновил свой профиль.", user.getName(), user.getLogin());
-        return newUser;
+        return user;
     }
 
     @Override
@@ -73,7 +41,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(Long id) {
-
         User user = users.get(id);
         if (user == null) {
             throw new NotFoundException("Пользователь не найден.");
