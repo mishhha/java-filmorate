@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -49,36 +48,21 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        if (id <= 0 || friendId <= 0) {
-            throw new ValidationException(
-                "ID пользователя и ID друга должен быть положительными " +
-                    "<" + id + ">" + "<" + friendId + ">"
-            );
-        }
+    public User deleteFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
         return userService.deleteFriend(id, friendId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
-    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        if (id <= 0 || friendId <= 0) {
-            throw new ValidationException(
-                "ID пользователя и ID друга должен быть положительными " +
-                    "<" + id + ">" + "<" + friendId + ">"
-            );
-        }
+    public User addFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
         return userService.addFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriend(@PathVariable Long id, @PathVariable Long otherId) {
-        if (id <= 0 || otherId <= 0) {
-            throw new ValidationException(
-                "ID пользователя и ID друга должен быть положительными " +
-                    "<" + id + ">" + "<" + otherId + ">"
-            );
-        }
+    public List<User> getCommonFriend(
+        @PathVariable @PositiveOrZero Long id,
+        @PathVariable @PositiveOrZero Long otherId
+    ) {
         return userService.getCommonFriend(id, otherId);
     }
 

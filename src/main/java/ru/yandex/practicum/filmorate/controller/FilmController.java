@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -40,38 +40,18 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        if (id <= 0 || userId <= 0) {
-            throw new ValidationException(
-                "Передаваемые значения должны быть положительными. " +
-                    "<" + id + "> " +
-                    "<" + userId + ">"
-            );
-        }
+    public void addLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
         filmService.userLikesFilm(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void disLike(@PathVariable Long id, @PathVariable Long userId) {
-        if (id <= 0 || userId <= 0) {
-            throw new ValidationException(
-                "Передаваемые значения должны быть положительными. " +
-                    "<" + id + "> " +
-                    "<" + userId + ">"
-            );
-        }
+    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
         filmService.userDislikesFilm(id, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") int count) {
-        if (count <= 0) {
-            throw new ValidationException(
-                "Передаваемые значения должны быть положительными. " +
-                    "<" + count + ">"
-            );
-        }
+    public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
         return filmService.getTopFilmsByLikes(count);
     }
 
