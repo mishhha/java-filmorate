@@ -72,7 +72,7 @@ public class FilmService {
         listFilms.sort(Comparator.comparing(Film::getLikes).reversed());
         int sizeList = listFilms.size();
         if (sizeList < count) {
-            return new ArrayList<>(listFilms.subList(0, sizeList));
+            return new ArrayList<>(listFilms);
         }
         return new ArrayList<>(listFilms.subList(0,count));
     }
