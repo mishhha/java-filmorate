@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
         return new ErrorHandler.ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorHandler.ErrorResponse handlerNotFound(final NotFoundException e) {
         return new ErrorHandler.ErrorResponse(e.getMessage());

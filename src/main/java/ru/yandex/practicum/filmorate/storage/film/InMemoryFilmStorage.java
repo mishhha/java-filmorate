@@ -2,17 +2,37 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
-@Component
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Long, Film> films = new HashMap<>();
+
+    private final UserService userService;
+
+    public InMemoryFilmStorage(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Override
+    public List<Film> getTopFilms(int count) {
+        List<Film> listFilms = getFilms();
+        listFilms.sort(Comparator.comparing(Film::getLikes).reversed());
+        int sizeList = listFilms.size();
+        if (sizeList < count) {
+            return new ArrayList<>(listFilms);
+        }
+        return new ArrayList<>(listFilms.subList(0,count));
+    }
 
     @Override
     public List<Film> getFilms() {
@@ -36,6 +56,24 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.put(film.getId(), film);
         log.info("Фильм {} обновлен.", film.getName());
         return film;
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        Film film = getFilmById(filmId);
+        User user = userService.getUsersById(userId);
+
+        film.addLike();
+        user.addLikesFilms(filmId);
+    }
+
+    @Override
+    public void removeLike(Long filmId, Long userId) {
+        Film film = getFilmById(filmId);
+        User user = userService.getUsersById(userId);
+
+        film.dislike();
+        user.getLikesFilms().remove(filmId);
     }
 
     public long nextIdGenerate() {
