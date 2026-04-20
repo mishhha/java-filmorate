@@ -18,7 +18,7 @@ INSERT INTO friendship_statuses (name) VALUES
     ('CONFIRMED'),
     ('UNCONFIRMED');
 
-/* INSERT INTO users (id, name, email, login, birthday) VALUES
+INSERT INTO users (id, name, email, login, birthday) VALUES
     (1, 'Test User', 'test@mail.ru', 'test_login', '1990-01-01'),
     (2, 'Second User', 'second@mail.ru', 'second_login', '1992-03-03'),
     (3, 'Third User', 'third@mail.ru', 'third_login', '1995-05-05');
@@ -30,5 +30,3 @@ INSERT INTO film_genres (film_id, genre_id) VALUES (1, 1);
 
 ALTER TABLE users ALTER COLUMN id RESTART WITH 4;
 ALTER TABLE films ALTER COLUMN id RESTART WITH 2;
-
- */

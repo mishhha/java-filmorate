@@ -23,7 +23,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -118,16 +117,18 @@ class FilmorateApplicationTests {
 	// Удаление дружбы
 	@Test
 	void testDeleteFriend() {
+		// 1. Создаём дружбу
 		userStorage.addFriend(1L, 2L);
 
+		// 2. Проверяем, что друг появился
 		List<User> friendsBefore = userStorage.getFriends(1L);
 		assertThat(friendsBefore).isNotEmpty().hasSize(1);
+		assertThat(friendsBefore.get(0).getId()).isEqualTo(2L);
 
-		User deletedFriend = userStorage.deleteFriend(1L, 2L);
+		// 3. Удаляем друга (метод ничего не возвращает — и это ок!)
+		userStorage.deleteFriend(1L, 2L);  // ← void
 
-		assertThat(deletedFriend).isNotNull();
-		assertThat(deletedFriend.getId()).isEqualTo(2L);
-
+		// 4. ✅ Проверяем результат по состоянию: друга больше нет
 		List<User> friendsAfter = userStorage.getFriends(1L);
 		assertThat(friendsAfter).isEmpty();
 	}
@@ -224,7 +225,7 @@ class FilmorateApplicationTests {
 		Genre drama = new Genre();
 		drama.setId(2L);
 
-		newFilm.setGenres(Set.of(comedy, drama));
+		newFilm.setGenres(List.of(comedy, drama));
 
 		Film created = filmStorage.addFilm(newFilm);
 
@@ -274,7 +275,7 @@ class FilmorateApplicationTests {
 		filmToUpdate.setDescription("Updated Description");
 		filmToUpdate.setReleaseDate(LocalDate.of(2024, 6, 15));
 		filmToUpdate.setDuration(150);
-		filmToUpdate.setGenres(Set.of(drama, action));
+		filmToUpdate.setGenres(List.of(drama, action));
 		filmToUpdate.setRating(ratingPg13);
 
 		Film updated = filmStorage.updateFilm(filmToUpdate);
@@ -284,7 +285,7 @@ class FilmorateApplicationTests {
 		assertThat(updated.getName()).isEqualTo("Updated Film");
 
 		assertThat(updated.getGenres()).extracting(Genre::getName)
-			.containsExactlyInAnyOrder("Драма", "Экшн");
+			.containsExactlyInAnyOrder("Драма", "Боевик");
 
 		assertThat(updated.getRating()).isNotNull();
 		assertThat(updated.getRating().getId()).isEqualTo(3L);
@@ -292,7 +293,7 @@ class FilmorateApplicationTests {
 
 		Film fromDb = filmStorage.getFilmById(1L);
 		assertThat(fromDb.getGenres()).extracting(Genre::getName)
-			.containsExactlyInAnyOrder("Драма", "Экшн");
+			.containsExactlyInAnyOrder("Драма", "Боевик");
 		assertThat(fromDb.getRating().getId()).isEqualTo(3L);
 	}
 

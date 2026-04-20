@@ -200,6 +200,8 @@ public class FilmDbStorage implements FilmStorage {
             return ps;
         });
 
+        jdbc.update(DELETE_GENRES_BY_FILM_ID, film.getId());
+
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             Set<Long> uniqueGenreIds = new HashSet<>();
             for (Genre genre : film.getGenres()) {
