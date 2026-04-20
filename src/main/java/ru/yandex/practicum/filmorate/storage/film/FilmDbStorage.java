@@ -173,7 +173,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             Set<Long> uniqueGenreIds = new HashSet<>();
             for (Genre genre : film.getGenres()) {
-                if(genre.getId() > 6 || genre.getId() <= 0) {
+                if (genre.getId() > 6 || genre.getId() <= 0) {
                     throw new NotFoundException("Жанра с id " + genre.getId() + " не существует");
                 }
                 uniqueGenreIds.add(genre.getId());
@@ -203,7 +203,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             Set<Long> uniqueGenreIds = new HashSet<>();
             for (Genre genre : film.getGenres()) {
-                if(genre.getId() > 6 || genre.getId() <= 0) {
+                if (genre.getId() > 6 || genre.getId() <= 0) {
                     throw new NotFoundException("Жанра с id " + genre.getId() + " не существует");
                 }
                 uniqueGenreIds.add(genre.getId());

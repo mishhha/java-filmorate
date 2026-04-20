@@ -143,7 +143,7 @@ public class UserDbStorage implements UserStorage {
         getUserById(idUser);
         getUserById(idFriend);
         int status1 = jdbc.update(INSERT_FRIENDS_USER_QUERY, idUser, idFriend);
-        if(status1 > 0) {
+        if (status1 > 0) {
             return getUserById(idFriend);
         }
         throw new ValidationException("Не удалось добавить дружбу между пользователями " + idUser + " и " + idFriend);
