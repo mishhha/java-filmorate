@@ -21,8 +21,8 @@ public class FilmService {
 
     private static final LocalDate MIN_DATE_RELEASE = LocalDate.of(1895, 12, 28);
 
-    public FilmService (@Qualifier ("filmDbStorage") FilmStorage filmStorage,
-                        @Qualifier ("userDbStorage") UserStorage userStorage) {
+    public FilmService (@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                        @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
