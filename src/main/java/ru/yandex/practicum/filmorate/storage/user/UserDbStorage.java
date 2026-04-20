@@ -133,9 +133,6 @@ public class UserDbStorage implements UserStorage {
 
         int rowsDeleted = jdbc.update(DELETE_FRIEND_BY_ID_QUERY, idUser, idFriend);
 
-        if (rowsDeleted == 0) {
-            throw new NotFoundException("Дружба между пользователями " + idUser + " и " + idFriend + " не найдена");
-        }
     }
 
     @Override
