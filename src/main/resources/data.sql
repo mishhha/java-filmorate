@@ -14,9 +14,9 @@ INSERT INTO mpa_ratings (id, name) VALUES
     (5, 'NC-17');
 
 
-INSERT INTO friendship_statuses (name) VALUES
-    ('CONFIRMED'),
-    ('UNCONFIRMED');
+INSERT INTO friendship_statuses (id, name) VALUES
+    (1, 'CONFIRMED'),
+    (2, 'UNCONFIRMED');
 
 INSERT INTO users (id, name, email, login, birthday) VALUES
     (1, 'Test User', 'test@mail.ru', 'test_login', '1990-01-01'),

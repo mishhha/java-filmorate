@@ -41,7 +41,7 @@ public class UserDbStorage implements UserStorage {
     """;
 
     private static final String INSERT_FRIENDS_USER_QUERY = """
-        INSERT INTO friends (user_id, friend_id) VALUES (?, ?)
+        INSERT INTO friendships (user_id, friend_id, status_id) VALUES (?, ?, ?)
     """;
 
     private static final String UPDATE_USER_QUERY = """
@@ -49,20 +49,20 @@ public class UserDbStorage implements UserStorage {
     """;
 
     private static final String DELETE_FRIEND_BY_ID_QUERY = """
-        DELETE FROM friends WHERE user_id = ? AND friend_id = ?
+        DELETE FROM friendships WHERE user_id = ? AND friend_id = ?
     """;
 
     private static final String FIND_FRIENDS_QUERY = """
         SELECT u.*
         FROM users AS u
-        JOIN friends AS f ON u.id = f.friend_id
+        JOIN friendships AS f ON u.id = f.friend_id
         WHERE f.user_id = ?
     """;
 
     private static final String FIND_COMMON_FRIENDS = """
         SELECT u.*
         FROM users AS u
-        JOIN friends AS f ON u.id = f.friend_id
+        JOIN friendships AS f ON u.id = f.friend_id
         WHERE f.user_id IN (?, ?)
         GROUP BY u.id
         HAVING COUNT(*) > 1
@@ -139,7 +139,7 @@ public class UserDbStorage implements UserStorage {
     public User addFriend(Long idUser, Long idFriend) {
         getUserById(idUser);
         getUserById(idFriend);
-        int status1 = jdbc.update(INSERT_FRIENDS_USER_QUERY, idUser, idFriend);
+        int status1 = jdbc.update(INSERT_FRIENDS_USER_QUERY, idUser, idFriend, 2);
         if (status1 > 0) {
             return getUserById(idFriend);
         }
