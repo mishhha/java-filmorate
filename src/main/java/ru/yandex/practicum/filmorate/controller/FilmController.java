@@ -1,86 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
+@Data
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
-    private static final LocalDate MIN_DATE_RELEASE = LocalDate.of(1895, 12, 28);
-    private final HashMap<Long, Film> films = new HashMap<>();
+    @Autowired
+    private final FilmService filmService;
 
     @PostMapping
-    public Film addFilm(@RequestBody @Valid Film film) {
-        if (film.getDescription().length() > 200) {
-            log.warn(
-                "Превышена длина описания {} при создании.",
-                film.getDescription().length()
-            );
-            throw new ValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
-            log.warn(
-                "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
-                film.getReleaseDate()
-            );
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-
-        Film newFilm = new Film();
-        newFilm.setId(nextIdGenerate());
-        newFilm.setName(film.getName());
-        newFilm.setDescription(film.getDescription());
-        newFilm.setReleaseDate(film.getReleaseDate());
-        newFilm.setDuration(film.getDuration());
-
-        films.put(newFilm.getId(), newFilm);
-        log.info("Фильм с названием {} создан.", film.getName());
-        return newFilm;
+    @ResponseStatus(HttpStatus.CREATED)
+    public Film addFilm(@RequestBody Film film) {
+        return filmService.addFilm(film);
     }
 
     @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public Film updateFilm(@RequestBody Film film) {
-
-        Film oldFilm = films.get(film.getId());
-        if (oldFilm == null) {
-            log.warn("Фильм с id {} не найден", film.getId());
-            throw new ValidationException("Такой фильм не найден");
-        }
-        Film newFilm = new Film();
-
-        newFilm.setId(oldFilm.getId());
-        newFilm.setName(film.getName());
-        newFilm.setDescription(film.getDescription());
-        newFilm.setReleaseDate(film.getReleaseDate());
-        newFilm.setDuration(film.getDuration());
-
-        films.put(newFilm.getId(), newFilm);
-            log.info("Фильм {} обновлен.", film.getName());
-        return newFilm;
+        return filmService.updateFilm(film);
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        return filmService.getFilms();
     }
 
-
-    public long nextIdGenerate() {
-        long nextId = films.keySet().stream()
-            .mapToLong(Long::longValue)
-            .max()
-            .orElse(0L);
-
-        return ++nextId;
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Film getFilmById(@PathVariable @PositiveOrZero Long id) {
+        return filmService.getFilmById(id);
     }
+
+    @PutMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+        filmService.userLikesFilm(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+        filmService.userDislikesFilm(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
+        return filmService.getTopFilmsByLikes(count);
+    }
+
 }
