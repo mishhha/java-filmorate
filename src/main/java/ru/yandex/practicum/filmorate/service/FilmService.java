@@ -1,47 +1,51 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 @Slf4j
-@Data
-@RequiredArgsConstructor
 public class FilmService {
 
-    private final InMemoryFilmStorage filmStorage;
-    private final InMemoryUserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     private static final LocalDate MIN_DATE_RELEASE = LocalDate.of(1895, 12, 28);
 
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+    }
+
     public Film addFilm(Film film) {
-        if (film.getName().isBlank()) {
+        if (film.getRating().getId() != null && (film.getRating().getId() > 5 || film.getRating().getId() <= 0)) {
+            throw new NotFoundException("Рейтинга с id " + film.getRating().getId() + " не существует.");
+        }
+
+        if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("Имя фильма не может быть пустым.");
         }
         if (film.getDuration() <= 0) {
             throw new ValidationException("Продолжительность фильма не может быть отрицательной.");
         }
-        if (film.getDescription().length() > 200) {
+        if (film.getDescription() == null || film.getDescription().length() > 200) {
             log.warn(
                 "Превышена длина описания {} при создании.",
                 film.getDescription().length()
             );
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
-        if (film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
             log.warn(
                 "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
                 film.getReleaseDate()
@@ -49,79 +53,39 @@ public class FilmService {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
 
-        Film newFilm = new Film();
-        newFilm.setId(filmStorage.nextIdGenerate());
-        newFilm.setName(film.getName());
-        newFilm.setDescription(film.getDescription());
-        newFilm.setReleaseDate(film.getReleaseDate());
-        newFilm.setDuration(film.getDuration());
-
-        return filmStorage.addFilm(newFilm);
+        return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        Film oldFilm = filmStorage.getFilmById(film.getId());
-        if (oldFilm == null) {
-            log.warn("Фильм с id {} не найден", film.getId());
-            throw new NotFoundException("Такой фильм не найден");
-        }
-        Film newFilm = new Film();
+        filmStorage.getFilmById(film.getId());
 
-        newFilm.setId(oldFilm.getId());
-        newFilm.setName(film.getName());
-        newFilm.setDescription(film.getDescription());
-        newFilm.setReleaseDate(film.getReleaseDate());
-        newFilm.setDuration(film.getDuration());
-
-        return filmStorage.updateFilm(newFilm);
+        return filmStorage.updateFilm(film);
     }
 
     public List<Film> getFilms() {
-        return new ArrayList<>(filmStorage.getFilms());
+        return filmStorage.getFilms();
     }
 
-    public void addLike(Long idFilm) {
-        Film film = filmStorage.getFilmById(idFilm);
-        if (film == null) {
-            throw new NotFoundException("Фильм с таким ID: " + idFilm + " не найден.");
-        }
-        film.addLike();
-    }
-
-    public void disLike(Long idFilm) {
-        Film film = filmStorage.getFilmById(idFilm);
-        if (film == null) {
-            throw new NotFoundException("Фильм с таким ID: " + idFilm + " не найден.");
-        }
-        film.dislike();
+    public Film getFilmById(Long idFilm) {
+        return filmStorage.getFilmById(idFilm);
     }
 
     public void userLikesFilm(Long id, Long userId) {
-        User user = userStorage.getUserById(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с таким ID не найден.");
-        }
-        user.addLikesFilms(id);
-        addLike(id);
+        filmStorage.getFilmById(id);
+        userStorage.getUserById(userId);
+
+        filmStorage.addLike(id, userId);
     }
 
     public void userDislikesFilm(Long id, Long userId) {
-        User user = userStorage.getUserById(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с таким ID не найден.");
-        }
-        user.getLikesFilms().remove(id);
-        disLike(id);
+        filmStorage.getFilmById(id);
+        userStorage.getUserById(userId);
+
+        filmStorage.removeLike(id, userId);
     }
 
     public List<Film> getTopFilmsByLikes(int count) {
-        List<Film> listFilms = filmStorage.getFilms();
-        listFilms.sort(Comparator.comparing(Film::getLikes).reversed());
-        int sizeList = listFilms.size();
-        if (sizeList < count) {
-            return new ArrayList<>(listFilms);
-        }
-        return new ArrayList<>(listFilms.subList(0,count));
+        return filmStorage.getTopFilms(count);
     }
 
 }

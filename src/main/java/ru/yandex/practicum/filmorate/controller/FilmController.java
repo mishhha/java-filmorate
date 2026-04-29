@@ -4,9 +4,10 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
 
+    @Autowired
     private final FilmService filmService;
 
     @PostMapping
@@ -36,6 +38,12 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
         return filmService.getFilms();
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Film getFilmById(@PathVariable @PositiveOrZero Long id) {
+        return filmService.getFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

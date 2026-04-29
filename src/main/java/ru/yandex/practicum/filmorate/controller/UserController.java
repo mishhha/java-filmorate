@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
@@ -38,18 +38,21 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public User getUsersById(@PathVariable Long id) {
         return userService.getUsersById(id);
     }
 
     @GetMapping("/{id}/friends")
+    @ResponseStatus(HttpStatus.OK)
     public List<User> getFriendsById(@PathVariable @PositiveOrZero Long id) {
         return userService.getFriends(id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
-        return userService.deleteFriend(id, friendId);
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
+        userService.deleteFriend(id, friendId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -59,6 +62,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
+    @ResponseStatus(HttpStatus.OK)
     public List<User> getCommonFriend(
         @PathVariable @PositiveOrZero Long id,
         @PathVariable @PositiveOrZero Long otherId
