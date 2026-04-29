@@ -22,6 +22,12 @@ public class FilmController {
     @Autowired
     private final FilmService filmService;
 
+    @DeleteMapping("/{filmId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUserById(@PathVariable @PositiveOrZero Long filmId) {
+        filmService.deleteFilmById(filmId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@RequestBody Film film) {
