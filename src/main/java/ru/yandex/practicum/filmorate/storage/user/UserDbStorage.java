@@ -68,6 +68,16 @@ public class UserDbStorage implements UserStorage {
         HAVING COUNT(*) > 1
     """;
 
+    private static final String DELETE_USER_BY_ID_QUERY = """
+        DELETE FROM users WHERE id = ?
+    """;
+
+    @Override
+    public void deleteUserById(Long userId) {
+        getUserById(userId);
+        jdbc.update(DELETE_USER_BY_ID_QUERY, userId);
+    }
+
     @Override
     public User updateUser(User user) {
 

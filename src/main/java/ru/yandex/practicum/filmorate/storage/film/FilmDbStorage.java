@@ -115,9 +115,19 @@ public class FilmDbStorage implements FilmStorage {
         UPDATE films SET likes_count = likes_count - 1 WHERE id = ?
         """;
 
+    private static final String DELETE_FILM_BY_ID_QUERY = """
+        DELETE FROM films WHERE id = ?
+        """;
+
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
+
+    @Override
+    public void deleteFilmById(Long filmId) {
+        getFilmById(filmId);
+        jdbc.update(DELETE_FILM_BY_ID_QUERY, filmId);
+    }
 
     @Override
     public List<Film> getFilms() {

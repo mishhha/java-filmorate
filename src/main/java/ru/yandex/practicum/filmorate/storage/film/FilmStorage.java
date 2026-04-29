@@ -8,6 +8,8 @@ import java.util.List;
 @Service
 public interface FilmStorage {
 
+    public void deleteFilmById(Long filmId);
+
     List<Film> getFilms();
 
     List<Film> getTopFilms(int count);
