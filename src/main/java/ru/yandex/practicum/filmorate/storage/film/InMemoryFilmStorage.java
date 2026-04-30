@@ -24,6 +24,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteFilmById(Long filmId) {
+        films.remove(filmId);
+    }
+
+    @Override
     public List<Film> getTopFilms(int count) {
         List<Film> listFilms = getFilms();
         listFilms.sort(Comparator.comparing(Film::getLikes).reversed());

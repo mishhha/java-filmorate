@@ -20,6 +20,10 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public void deleteUserById(Long userId) {
+        userStorage.deleteUserById(userId);
+    }
+
     public User addUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             log.warn("Пользователю {} назначено имя {} при регистрации.", user.getName(), user.getLogin());
