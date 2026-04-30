@@ -19,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
 
-    @Autowired
     private final FilmService filmService;
 
     @DeleteMapping("/{filmId}")
