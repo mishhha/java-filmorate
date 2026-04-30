@@ -119,13 +119,20 @@ public class FilmDbStorage implements FilmStorage {
         DELETE FROM films WHERE id = ?
         """;
 
+    private static final String CHECK_FILM_EXISTS_BY_ID_QUERY = """
+        SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
+        """;
+
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
 
     @Override
     public void deleteFilmById(Long filmId) {
-        getFilmById(filmId);
+        boolean checkFilm = jdbc.queryForObject(CHECK_FILM_EXISTS_BY_ID_QUERY, Boolean.class, filmId);
+        if (!checkFilm) {
+            throw new NotFoundException("Фильм с id " + filmId + " не найден");
+        }
         jdbc.update(DELETE_FILM_BY_ID_QUERY, filmId);
     }
 
@@ -147,9 +154,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(Long id) {
         try {
             Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
-            if (film != null) {
-                film.setGenres(getGenresByFilmId(film.getId()));
-            }
+            film.setGenres(getGenresByFilmId(film.getId()));
             return film;
         } catch (EmptyResultDataAccessException e) {
             log.warn("Фильм с id {} не найден", id);
