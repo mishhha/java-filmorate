@@ -283,6 +283,7 @@ public class FilmDbStorage implements FilmStorage {
         if (!checkUser) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
+
         List<Film> films = jdbc.query(FIND_COMMON_FILMS, filmRowMapper, userId, friendId);
         for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
