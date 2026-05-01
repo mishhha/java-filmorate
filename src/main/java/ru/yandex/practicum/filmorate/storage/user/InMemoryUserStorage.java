@@ -106,11 +106,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void addEvent(Event event) {
-        User user = users.get(event.getUserId());
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
-
         event.setId(eventFeed.size() + 1L);
         event.setTimestamp(LocalDateTime.now());
         eventFeed.put(event.getId(), event);
@@ -120,11 +115,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<Event> getEventList(Long userId) {
-        User user = users.get(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
-
         return eventFeed.values().stream()
                 .filter(event -> userId.equals(event.getUserId()))
                 .toList();

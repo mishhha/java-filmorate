@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.user.Event;
+import ru.yandex.practicum.filmorate.model.user.EventOperations;
+import ru.yandex.practicum.filmorate.model.user.EventTypes;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -79,6 +82,14 @@ public class FilmService {
         userStorage.getUserById(userId);
 
         filmStorage.addLike(id, userId);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.LIKE)
+                .operation(EventOperations.ADD)
+                .entityId(id)
+                .build());
     }
 
     public void userDislikesFilm(Long id, Long userId) {
@@ -86,6 +97,14 @@ public class FilmService {
         userStorage.getUserById(userId);
 
         filmStorage.removeLike(id, userId);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.LIKE)
+                .operation(EventOperations.REMOVE)
+                .entityId(id)
+                .build());
     }
 
     public List<Film> getTopFilmsByLikes(int count) {

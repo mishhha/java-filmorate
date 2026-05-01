@@ -84,7 +84,7 @@ public class UserDbStorage implements UserStorage {
     """;
 
     private static final String GET_EVENTS_BY_USER_ID = """
-        SELECT * FROM events WHERE user_id = ?
+        SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC
     """;
 
     @Override
@@ -179,14 +179,21 @@ public class UserDbStorage implements UserStorage {
         return jdbc.query(FIND_COMMON_FRIENDS, rowMapper, id, otherId);
     }
 
+    private void checkUserExistsById(Long userId) throws NotFoundException {
+        boolean checkUser =  jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
+
+        if (!checkUser) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
+    }
+
     @Override
     public void addEvent(Event event) {
-
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    INSERT_EVENT_QUERY, Statement.RETURN_GENERATED_KEYS
+                    INSERT_EVENT_QUERY, new String[]{"id"}
             );
             ps.setLong(1, event.getUserId());
             ps.setString(2, event.getEventType().name());
@@ -200,8 +207,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<Event> getEventList(Long userId) {
-        User user = getUserById(userId);
+        checkUserExistsById(userId);
 
-        return jdbc.query(GET_EVENTS_BY_USER_ID, rowEventMapper);
+        return jdbc.query(GET_EVENTS_BY_USER_ID, rowEventMapper, userId);
     }
 }

@@ -12,9 +12,12 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.RatingMpa;
+import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.mappers.EventRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
@@ -27,9 +30,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
-@Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class})
+@Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class, EventRowMapper.class, UserService.class})
 @AutoConfigureTestDatabase
 class FilmorateApplicationTests {
 
@@ -40,6 +44,9 @@ class FilmorateApplicationTests {
 	@Autowired
 	@Qualifier("filmDbStorage")
 	private FilmStorage filmStorage;
+
+	@Autowired
+	private UserService userService;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -374,5 +381,35 @@ class FilmorateApplicationTests {
 			.hasMessageContaining("не найден");
 	}
 
+	// Получение списка событий по пользователю
+	@Test
+	void testGetEventList() {
+		User user1 = new User();
+		user1.setEmail("testUser1@mail.ru");
+		user1.setLogin("testUser1");
+		user1.setName("Test User 1");
+		user1.setBirthday(LocalDate.of(1995, 5, 5));
+		user1 = userService.addUser(user1);
 
+		User user2 = new User();
+		user2.setEmail("testUser2@mail.ru");
+		user2.setLogin("testUser2");
+		user2.setName("Test User 2");
+		user2.setBirthday(LocalDate.of(1995, 5, 5));
+		user2 = userService.addUser(user2);
+
+		userService.addFriend(user1.getId(), user2.getId());
+		userService.deleteFriend(user1.getId(), user2.getId());
+
+		List<Event> events = userService.getEventList(user1.getId());
+		assertTrue(events != null && !events.isEmpty(), "Ошибка получения событий");
+	}
+
+	// Получение списка событий по несуществующему пользователю
+	@Test
+	void testGetEventList_notFound() {
+		assertThatThrownBy(() -> userService.getEventList(999L))
+				.isInstanceOf(NotFoundException.class)
+				.hasMessageContaining("не найден");
+	}
 }
