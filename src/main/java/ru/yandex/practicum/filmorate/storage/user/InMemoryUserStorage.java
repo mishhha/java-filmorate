@@ -18,6 +18,11 @@ public class InMemoryUserStorage implements UserStorage {
     private final HashMap<Long, Event> eventFeed = new HashMap<>();
 
     @Override
+    public void deleteUserById(Long userId) {
+        users.remove(userId);
+    }
+
+    @Override
     public User addUser(User user) {
         users.put(user.getId(), user);
         log.info("Пользователь с именем {} и логином {} зарегистрирован.", user.getName(), user.getLogin());

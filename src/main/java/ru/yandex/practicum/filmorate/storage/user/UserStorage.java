@@ -9,6 +9,8 @@ import java.util.List;
 @Service
 public interface UserStorage {
 
+    void deleteUserById(Long userId);
+
     User addUser(User user);
 
     User updateUser(User user);
