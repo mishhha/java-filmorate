@@ -6,10 +6,8 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("inMemoryFilmStorage")
@@ -88,5 +86,17 @@ public class InMemoryFilmStorage implements FilmStorage {
             .orElse(0L);
 
         return ++nextId;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        Set<Long> friendFilmList = userService.getUsersById(friendId).getLikesFilms();
+
+        return userService.getUsersById(userId).getLikesFilms().stream()
+                .filter(friendFilmList::contains)
+                .map(films::get)
+                .filter(Objects::nonNull)
+                .sorted((film1, film2) -> (int)(film2.getLikes() - film1.getLikes()))
+                .collect(Collectors.toList());
     }
 }
