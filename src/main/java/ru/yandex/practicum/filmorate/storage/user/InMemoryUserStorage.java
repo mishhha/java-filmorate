@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Long, User> users = new HashMap<>();
+    private final HashMap<Long, Event> eventFeed = new HashMap<>();
 
     @Override
     public User addUser(User user) {
@@ -94,7 +97,32 @@ public class InMemoryUserStorage implements UserStorage {
             .map(users::get)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
 
+    @Override
+    public void addEvent(Event event) {
+        User user = users.get(event.getUserId());
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+
+        event.setId(eventFeed.size() + 1L);
+        event.setTimestamp(LocalDateTime.now());
+        eventFeed.put(event.getId(), event);
+
+        log.info("Зарегистрирована операция {} по событию {}", event.getOperation(), event.getEventType());
+    }
+
+    @Override
+    public List<Event> getEventList(Long userId) {
+        User user = users.get(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+
+        return eventFeed.values().stream()
+                .filter(event -> userId.equals(event.getUserId()))
+                .toList();
     }
 
     public long nextIdGenerate() {

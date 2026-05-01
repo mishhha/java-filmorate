@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.storage.mappers.EventRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.sql.PreparedStatement;
@@ -27,6 +29,7 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbc;
     private final UserRowMapper rowMapper;
+    private final EventRowMapper rowEventMapper;
 
     private static final String FIND_ALL = """
         SELECT * FROM users
@@ -66,6 +69,14 @@ public class UserDbStorage implements UserStorage {
         WHERE f.user_id IN (?, ?)
         GROUP BY u.id
         HAVING COUNT(*) > 1
+    """;
+
+    private static final String INSERT_EVENT_QUERY = """
+        INSERT INTO events (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?)
+    """;
+
+    private static final String GET_EVENTS_BY_USER_ID = """
+        SELECT * FROM events WHERE user_id = ?
     """;
 
     @Override
@@ -151,4 +162,29 @@ public class UserDbStorage implements UserStorage {
         return jdbc.query(FIND_COMMON_FRIENDS, rowMapper, id, otherId);
     }
 
+    @Override
+    public void addEvent(Event event) {
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbc.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    INSERT_EVENT_QUERY, Statement.RETURN_GENERATED_KEYS
+            );
+            ps.setLong(1, event.getUserId());
+            ps.setString(2, event.getEventType().name());
+            ps.setString(3, event.getOperation().name());
+            ps.setLong(4, event.getEntityId());
+            return ps;
+        }, keyHolder);
+
+        event.setId(keyHolder.getKey().longValue());
+    }
+
+    @Override
+    public List<Event> getEventList(Long userId) {
+        User user = getUserById(userId);
+
+        return jdbc.query(GET_EVENTS_BY_USER_ID, rowEventMapper);
+    }
 }
