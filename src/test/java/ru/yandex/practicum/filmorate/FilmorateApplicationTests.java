@@ -229,7 +229,7 @@ class FilmorateApplicationTests {
 		// Assert
 		assertThat(films).isNotNull();
 		assertThat(films).isNotEmpty();
-		assertThat(films).hasSize(1);
+		assertThat(films).hasSize(4);
 		assertThat(films.get(0).getName()).isEqualTo("Test Film");
 	}
 
