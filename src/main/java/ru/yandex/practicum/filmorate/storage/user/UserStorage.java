@@ -27,7 +27,7 @@ public interface UserStorage {
 
     List<User> getCommonFriends(Long id, Long otherId);
 
-    void addEvent (Event event);
+    void addEvent(Event event);
 
     List<Event> getEventList(Long userId);
 }
