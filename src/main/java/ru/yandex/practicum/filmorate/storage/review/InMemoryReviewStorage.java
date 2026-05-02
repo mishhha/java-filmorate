@@ -14,8 +14,6 @@ public class InMemoryReviewStorage implements ReviewStorage {
     private Map<Long, Review> reviews = new HashMap<>();
     private long id = 1;
 
-    private Map<Long, Map<Long, Integer>> reviewLikes = new HashMap<>();
-
     @Override
     public Review create(Review review) {
         review.setReviewId(id++);
@@ -25,6 +23,9 @@ public class InMemoryReviewStorage implements ReviewStorage {
 
     @Override
     public Review update(Review review) {
+        if (!reviews.containsKey(review.getReviewId())) {
+            return null;
+        }
         reviews.put(review.getReviewId(), review);
         return review;
     }
@@ -32,7 +33,6 @@ public class InMemoryReviewStorage implements ReviewStorage {
     @Override
     public void delete(Long id) {
         reviews.remove(id);
-        reviewLikes.remove(id);
     }
 
     @Override
