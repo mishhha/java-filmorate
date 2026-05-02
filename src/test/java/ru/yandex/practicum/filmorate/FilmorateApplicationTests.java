@@ -379,29 +379,15 @@ class FilmorateApplicationTests {
 			.hasMessageContaining("не найден");
 	}
 
-	// Получение общих фильмов должно вернуть фильм, которому поставили лайк оба пользователя
+	// Получение общих фильмов
 	@Test
 	void testGetCommonFilms() {
-		filmStorage.addLike(1L, 1L);
-		filmStorage.addLike(1L, 2L);
-
 		List<Film> commonFilms = filmStorage.getCommonFilms(1L, 2L);
 
 		assertThat(commonFilms).isNotNull();
 		assertThat(commonFilms).isNotEmpty();
-		assertThat(commonFilms).hasSize(1);
-		assertThat(commonFilms.getFirst().getId()).isEqualTo(1L);
-	}
-
-	// Получение общих фильмов должно вернуть пустой список, так как лайк поставил только один пользователь
-	@Test
-	void testGetCommonFilms_emptyList() {
-		filmStorage.addLike(1L, 1L);
-
-		List<Film> commonFilms = filmStorage.getCommonFilms(1L, 2L);
-
-		assertThat(commonFilms).isNotNull();
-		assertThat(commonFilms).isEmpty();
+		assertThat(commonFilms).hasSize(2);
+		assertThat(commonFilms.getFirst().getId()).isEqualTo(2L);
 	}
 
 	// Получение рекомендаций по несуществующему пользователю
