@@ -40,15 +40,15 @@ public class FilmService {
         }
         if (film.getDescription() == null || film.getDescription().length() > 200) {
             log.warn(
-                "Превышена длина описания {} при создании.",
-                film.getDescription().length()
+                    "Превышена длина описания {} при создании.",
+                    film.getDescription().length()
             );
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
             log.warn(
-                "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
-                film.getReleaseDate()
+                    "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
+                    film.getReleaseDate()
             );
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
@@ -83,6 +83,7 @@ public class FilmService {
 
         filmStorage.removeLike(id, userId);
     }
+
     public List<Film> getPopularFilms(int count, Integer genreId, Integer year) {
 
         return filmStorage.getFilms().stream()
