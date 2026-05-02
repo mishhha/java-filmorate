@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class FilmController {
 
     @DeleteMapping("/{filmId}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteUserById(@PathVariable @PositiveOrZero Long filmId) {
+    public void deleteFilmById(@PathVariable @PositiveOrZero Long filmId) {
         filmService.deleteFilmById(filmId);
     }
 
@@ -65,6 +66,12 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
         return filmService.getTopFilmsByLikes(count);
+    }
+
+    @GetMapping("/common")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getCommonFilms(@RequestParam @Positive Long userId, @RequestParam @Positive Long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
     }
 
 }
