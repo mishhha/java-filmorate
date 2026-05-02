@@ -391,9 +391,9 @@ class FilmorateApplicationTests {
 		assertThat(commonFilms).isNotEmpty();
 		assertThat(commonFilms).hasSize(1);
 		assertThat(commonFilms.getFirst().getId()).isEqualTo(1L);
-  }
-  
-  // Получение общих фильмов должно вернуть пустой список, так как лайк поставил только один пользователь
+	}
+
+	// Получение общих фильмов должно вернуть пустой список, так как лайк поставил только один пользователь
 	@Test
 	void testGetCommonFilms_emptyList() {
 		filmStorage.addLike(1L, 1L);
@@ -403,7 +403,7 @@ class FilmorateApplicationTests {
 		assertThat(commonFilms).isNotNull();
 		assertThat(commonFilms).isEmpty();
 	}
-  
+
 	// Получение рекомендаций по несуществующему пользователю
 	@Test
 	void testGetRecommendations_notFound() {
