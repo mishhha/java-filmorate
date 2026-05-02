@@ -8,7 +8,7 @@ import java.util.List;
 @Service
 public interface FilmStorage {
 
-    void deleteFilmById(Long filmId);
+    public void deleteFilmById(Long filmId);
 
     List<Film> getFilms();
 
@@ -20,9 +20,9 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
-    void addLike(Long filmId, Long userId);
+    public void addLike(Long filmId, Long userId);
 
-    void removeLike(Long filmId, Long userId);
+    public void removeLike(Long filmId, Long userId);
 
-    List<Film> getCommonFilms(Long userId, Long friendId);
+    public List<Film> getCommonFilms(Long userId, Long friendId);
 }
