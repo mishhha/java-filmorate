@@ -27,6 +27,10 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
+    public void deleteFilmById(Long filmId) {
+        filmStorage.deleteFilmById(filmId);
+    }
+
     public Film addFilm(Film film) {
         if (film.getRating().getId() != null && (film.getRating().getId() > 5 || film.getRating().getId() <= 0)) {
             throw new NotFoundException("Рейтинга с id " + film.getRating().getId() + " не существует.");

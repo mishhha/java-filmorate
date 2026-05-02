@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JdbcTest
 @Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class})
@@ -44,6 +45,20 @@ class FilmorateApplicationTests {
 	private JdbcTemplate jdbcTemplate;
 
 	// 									Тесты для userDbStorage
+
+	// Удаление пользователя
+	@Test
+	public void testDeleteUserById() {
+		Long userId = 1L;
+
+		userStorage.deleteUserById(userId);
+
+		assertThrows(
+			NotFoundException.class,
+			() -> userStorage.getUserById(userId),
+			"Ожидается, что после удаления пользователя его получение по ID вызовет NotFoundException"
+		);
+	}
 
 	// Получить пользователя по ID
     @Test
@@ -190,6 +205,20 @@ class FilmorateApplicationTests {
 	}
 
 	//										Тесты для filmDbStorage
+
+	// Удаление фильма по ID
+	@Test
+	public void testDeleteFilmById() {
+		Long filmId = 1L;
+
+		filmStorage.deleteFilmById(filmId);
+
+		assertThrows(
+			NotFoundException.class,
+			() -> filmStorage.getFilmById(filmId),
+			"Ожидается, что после удаления фильма его получение по ID вызовет NotFoundException"
+		);
+	}
 
 	// Получение списка фильмов.
 	@Test
