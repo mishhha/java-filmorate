@@ -28,8 +28,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getTopFilms(int count, Long genreId, Integer year) {
         return getFilms().stream()
                 .filter(film -> genreId == null
-                        || film.getGenres().stream()
-                        .anyMatch(g -> g.getId().equals(genreId)))
+                        || (film.getGenres() != null &&
+                        film.getGenres().stream()
+                                .anyMatch(g -> g.getId().equals(genreId))))
                 .filter(film -> year == null
                         || film.getReleaseDate().getYear() == year)
                 .sorted(Comparator.comparing(Film::getLikes).reversed())
