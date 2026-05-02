@@ -254,4 +254,9 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(UPDATE_DISLIKES_FILM, filmId);
     }
 
+    @Override
+    public void deleteFilmById(Long filmId) {
+        jdbc.update("DELETE FROM films WHERE id = ?", filmId);
+    }
+
 }

@@ -22,4 +22,6 @@ public interface FilmStorage {
 
     public void removeLike(Long id, Long filmId);
 
+    void deleteFilmById(Long filmId);
+
 }
