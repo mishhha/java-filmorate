@@ -102,11 +102,11 @@ public class UserService {
         }
 
         //Идентификаторы рекомендованных фильмов
-        List<Long> movieIds = similarUser.getLikesFilms().stream()
-                .filter(movieId -> !currentUserLikes.contains(movieId))
+        List<Long> filmIds = similarUser.getLikesFilms().stream()
+                .filter(filmId -> !currentUserLikes.contains(filmId))
                 .toList();
 
-        return movieIds.stream()
+        return filmIds.stream()
                 .map(filmStorage::getFilmById)
                 .toList();
     }

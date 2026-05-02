@@ -77,6 +77,9 @@ public class UserController {
         return userService.getCommonFriend(id, otherId);
     }
 
+    /*
+    Рекомендации фильмов для пользователя, по схожим интересам других пользователей
+     */
     @GetMapping("/{id}/recommendations")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getRecommendations(
