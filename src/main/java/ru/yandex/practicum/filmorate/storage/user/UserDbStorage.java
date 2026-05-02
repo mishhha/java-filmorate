@@ -17,6 +17,8 @@ import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Primary
@@ -76,6 +78,10 @@ public class UserDbStorage implements UserStorage {
         SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
     """;
 
+    private static final String GET_LIKE_FILM_BY_USER = """
+        SELECT film_id FROM likes WHERE user_id = ?
+        """;
+
     @Override
     public void deleteUserById(Long userId) {
         boolean checkUser = jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
@@ -124,13 +130,21 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getUsers() {
-        return jdbc.query(FIND_ALL, rowMapper);
+        List<User> users = jdbc.query(FIND_ALL, rowMapper);
+        users.stream().forEach(user -> {
+            user.setLikesFilms(getFilmsLike(user.getId()));
+        });
+
+        return users;
     }
 
     @Override
     public User getUserById(Long id) {
         try {
-            return jdbc.queryForObject(FIND_BY_ID, rowMapper, id);
+            User user = jdbc.queryForObject(FIND_BY_ID, rowMapper, id);
+            user.setLikesFilms(getFilmsLike(id));
+
+            return user;
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
@@ -166,6 +180,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getCommonFriends(Long id, Long otherId) {
         return jdbc.query(FIND_COMMON_FRIENDS, rowMapper, id, otherId);
+    }
+
+    public Set<Long> getFilmsLike(Long userId) {
+        List<Long> entityList = jdbc.query(GET_LIKE_FILM_BY_USER, (rs, rowNum) -> rs.getLong("film_id"), userId);
+        return entityList.stream().collect(Collectors.toSet());
     }
 
 }
