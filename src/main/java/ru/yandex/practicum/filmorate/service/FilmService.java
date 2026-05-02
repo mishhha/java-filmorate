@@ -84,23 +84,8 @@ public class FilmService {
         filmStorage.removeLike(id, userId);
     }
 
-    public List<Film> getPopularFilms(int count, Integer genreId, Integer year) {
-
-        return filmStorage.getFilms().stream()
-
-                .filter(f -> genreId == null ||
-                        (f.getGenres() != null &&
-                                f.getGenres().stream()
-                                        .anyMatch(g -> g.getId().equals(genreId))))
-
-                .filter(f -> year == null ||
-                        (f.getReleaseDate() != null &&
-                                f.getReleaseDate().getYear() == year))
-
-                .sorted((a, b) -> Long.compare(b.getLikes(), a.getLikes()))
-
-                .limit(count)
-                .toList();
+    public List<Film> getTopFilmsByLikes(int count, Long genreId, Integer year) {
+        return filmStorage.getTopFilms(count, genreId, year);
     }
 
 }

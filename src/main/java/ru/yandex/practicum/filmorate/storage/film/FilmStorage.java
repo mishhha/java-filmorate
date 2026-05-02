@@ -10,7 +10,7 @@ public interface FilmStorage {
 
     List<Film> getFilms();
 
-    List<Film> getTopFilms(int count);
+    List<Film> getTopFilms(int count, Long genreId, Integer year);
 
     Film getFilmById(Long id);
 

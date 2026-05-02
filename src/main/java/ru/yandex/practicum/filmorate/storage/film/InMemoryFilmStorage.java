@@ -23,16 +23,20 @@ public class InMemoryFilmStorage implements FilmStorage {
         this.userService = userService;
     }
 
+
     @Override
-    public List<Film> getTopFilms(int count) {
-        List<Film> listFilms = getFilms();
-        listFilms.sort(Comparator.comparing(Film::getLikes).reversed());
-        int sizeList = listFilms.size();
-        if (sizeList < count) {
-            return new ArrayList<>(listFilms);
-        }
-        return new ArrayList<>(listFilms.subList(0,count));
+    public List<Film> getTopFilms(int count, Long genreId, Integer year) {
+        return getFilms().stream()
+                .filter(film -> genreId == null
+                        || film.getGenres().stream()
+                        .anyMatch(g -> g.getId().equals(genreId)))
+                .filter(film -> year == null
+                        || film.getReleaseDate().getYear() == year)
+                .sorted(Comparator.comparing(Film::getLikes).reversed())
+                .limit(count)
+                .toList();
     }
+
 
     @Override
     public List<Film> getFilms() {
@@ -78,9 +82,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public long nextIdGenerate() {
         long nextId = films.keySet().stream()
-            .mapToLong(Long::longValue)
-            .max()
-            .orElse(0L);
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(0L);
 
         return ++nextId;
     }
