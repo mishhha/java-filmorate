@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 public class ReviewService {
 
     private final ReviewStorage storage;
+    private final UserService userService;
+    private final FilmService filmService;
 
 
     private final Map<Long, Map<Long, Integer>> reviewLikes = new HashMap<>();
@@ -23,6 +25,10 @@ public class ReviewService {
 
     public Review create(Review review) {
         validate(review);
+
+        userService.getUsersById(review.getUserId());
+        filmService.getFilmById(review.getFilmId());
+
         review.setUseful(0);
         return storage.create(review);
     }
