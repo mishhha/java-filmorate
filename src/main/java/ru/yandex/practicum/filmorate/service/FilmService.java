@@ -89,11 +89,13 @@ public class FilmService {
         return filmStorage.getFilms().stream()
 
                 .filter(f -> genreId == null ||
-                        f.getGenres().stream()
-                                .anyMatch(g -> g.getId().equals(genreId)))
+                        (f.getGenres() != null &&
+                                f.getGenres().stream()
+                                        .anyMatch(g -> g.getId().equals(genreId))))
 
                 .filter(f -> year == null ||
-                        f.getReleaseDate().getYear() == year)
+                        (f.getReleaseDate() != null &&
+                                f.getReleaseDate().getYear() == year))
 
                 .sorted((a, b) -> Long.compare(b.getLikes(), a.getLikes()))
 
