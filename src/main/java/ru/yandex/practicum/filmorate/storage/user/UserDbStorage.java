@@ -68,6 +68,23 @@ public class UserDbStorage implements UserStorage {
         HAVING COUNT(*) > 1
     """;
 
+    private static final String DELETE_USER_BY_ID_QUERY = """
+        DELETE FROM users WHERE id = ?
+    """;
+
+    private static final String CHECK_USER_EXISTS_BY_ID = """
+        SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+    """;
+
+    @Override
+    public void deleteUserById(Long userId) {
+        boolean checkUser = jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
+        if (!checkUser) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
+        jdbc.update(DELETE_USER_BY_ID_QUERY, userId);
+    }
+
     @Override
     public User updateUser(User user) {
 

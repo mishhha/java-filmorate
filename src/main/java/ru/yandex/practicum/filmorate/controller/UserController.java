@@ -19,6 +19,12 @@ public class UserController {
 
     private final UserService userService;
 
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUserById(@PathVariable @PositiveOrZero Long userId) {
+        userService.deleteUserById(userId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User addUser(@RequestBody @Valid User user) {
