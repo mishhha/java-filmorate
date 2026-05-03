@@ -368,13 +368,16 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException("Режиссёр с id " + directorId + " не найден");
         }
 
-        String strSortBy = "";
+        String strSortBy;
+        String strSortType;
         switch (sortBy) {
             case LIKES:
                 strSortBy = "likes_count";
+                strSortType = "DESC";
                 break;
             case YEAR:
                 strSortBy = "release_date";
+                strSortType = "ASC";
                 break;
             default:
                 throw new ValidationException("Тип сортировки не распознан");
@@ -395,8 +398,8 @@ public class FilmDbStorage implements FilmStorage {
         JOIN films_directors AS fd ON f.id = fd.film_id
         WHERE fd.director_id = ?
         GROUP BY f.id, f.%s
-        ORDER BY f.%s DESC
-        """, strSortBy, strSortBy);
+        ORDER BY f.%s %s
+        """, strSortBy, strSortBy, strSortType);
 
         List<Film> films = jdbc.query(findDirectorFilms, filmRowMapper, directorId);
         for (Film film : films) {

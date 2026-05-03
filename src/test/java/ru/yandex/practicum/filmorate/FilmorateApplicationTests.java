@@ -453,7 +453,7 @@ class FilmorateApplicationTests {
 		assertThat(films).isNotNull();
 		assertThat(films).isNotEmpty();
 		assertThat(films).hasSize(3);
-		assertThat(films.get(0).getName()).isEqualTo("Чебурашка");
+		assertThat(films.get(0).getName()).isEqualTo("Бриллиантовая рука");
 	}
 
 	// 									Тесты для directorDbStorage
