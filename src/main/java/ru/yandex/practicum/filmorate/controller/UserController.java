@@ -89,6 +89,10 @@ public class UserController {
         return userService.getRecommendations(id);
     }
 
+
+    /*
+    Возвращает ленту событий пользователя.
+    */
     @GetMapping("/{id}/feed")
     @ResponseStatus(HttpStatus.OK)
     public List<Event> getEventList(
