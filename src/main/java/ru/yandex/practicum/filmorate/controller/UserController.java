@@ -72,8 +72,8 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     @ResponseStatus(HttpStatus.OK)
     public List<User> getCommonFriend(
-        @PathVariable @PositiveOrZero Long id,
-        @PathVariable @PositiveOrZero Long otherId
+            @PathVariable @PositiveOrZero Long id,
+            @PathVariable @PositiveOrZero Long otherId
     ) {
         return userService.getCommonFriend(id, otherId);
     }
@@ -88,6 +88,7 @@ public class UserController {
     ) {
         return userService.getRecommendations(id);
     }
+
     @GetMapping("/{id}/feed")
     @ResponseStatus(HttpStatus.OK)
     public List<Event> getEventList(
