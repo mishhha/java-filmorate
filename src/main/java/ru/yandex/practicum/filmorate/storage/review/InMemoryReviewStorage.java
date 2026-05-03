@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.review.Review;
 
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Primary
 @Component
 public class InMemoryReviewStorage implements ReviewStorage {
 

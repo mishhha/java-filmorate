@@ -6,7 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.review.Review;
+import ru.yandex.practicum.filmorate.model.user.Event;
+import ru.yandex.practicum.filmorate.model.user.EventOperations;
+import ru.yandex.practicum.filmorate.model.user.EventTypes;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,24 +20,32 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    private final ReviewStorage storage;
-    private final UserService userService;
-    private final FilmService filmService;
+    private final ReviewStorage reviewStorage;
+    private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
 
-
-    private final Map<Long, Map<Long, Integer>> reviewLikes = new HashMap<>();
-
+    private Map<Long, Map<Long, Integer>> reviewLikes = new HashMap<>();
 
     public Review create(Review review) {
         validate(review);
 
-        userService.getUsersById(review.getUserId());
-        filmService.getFilmById(review.getFilmId());
+        userStorage.getUserById(review.getUserId());
+        filmStorage.getFilmById(review.getFilmId());
 
         review.setUseful(0);
-        return storage.create(review);
-    }
 
+        review = reviewStorage.create(review);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(EventOperations.ADD)
+                .entityId(review.getReviewId())
+                .build());
+
+        return review;
+    }
 
     public Review update(Review review) {
         if (review.getReviewId() == null) {
@@ -40,14 +53,32 @@ public class ReviewService {
         }
         getReviewOrThrow(review.getReviewId());
         validate(review);
-        return storage.update(review);
+        review = reviewStorage.update(review);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(EventOperations.UPDATE)
+                .entityId(review.getReviewId())
+                .build());
+
+        return review;
     }
 
-
     public void delete(Long id) {
-        getReviewOrThrow(id);
-        storage.delete(id);
+        Review review = getReviewOrThrow(id);
+
+        reviewStorage.delete(id);
         reviewLikes.remove(id);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(EventOperations.REMOVE)
+                .entityId(review.getReviewId())
+                .build());
     }
 
 
@@ -55,9 +86,8 @@ public class ReviewService {
         return getReviewOrThrow(id);
     }
 
-
     public List<Review> getAll(Long filmId, int count) {
-        return storage.getAll().stream()
+        return reviewStorage.getAll().stream()
                 .filter(r -> filmId == null ||
                         (r.getFilmId() != null && r.getFilmId().equals(filmId)))
                 .sorted(Comparator.comparingInt(Review::getUseful).reversed())
@@ -82,6 +112,14 @@ public class ReviewService {
             review.setUseful(review.getUseful() + 2);
         }
 
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.LIKE)
+                .operation(EventOperations.ADD)
+                .entityId(reviewId)
+                .build());
+
         return review;
     }
 
@@ -102,6 +140,14 @@ public class ReviewService {
             review.setUseful(review.getUseful() - 2);
         }
 
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.DISLIKE)
+                .operation(EventOperations.ADD)
+                .entityId(reviewId)
+                .build());
+
         return review;
     }
 
@@ -120,6 +166,14 @@ public class ReviewService {
             review.setUseful(review.getUseful() + 1);
         }
 
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.LIKE)
+                .operation(EventOperations.REMOVE)
+                .entityId(reviewId)
+                .build());
+
         return review;
     }
 
@@ -137,6 +191,14 @@ public class ReviewService {
         } else if (old != null && old == 1) {
             review.setUseful(review.getUseful() - 1);
         }
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.DISLIKE)
+                .operation(EventOperations.REMOVE)
+                .entityId(reviewId)
+                .build());
 
         return review;
     }
@@ -158,7 +220,7 @@ public class ReviewService {
     }
 
     private Review getReviewOrThrow(Long id) {
-        Review review = storage.getById(id);
+        Review review = reviewStorage.getById(id);
         if (review == null) {
             throw new NotFoundException("Review not found");
         }
