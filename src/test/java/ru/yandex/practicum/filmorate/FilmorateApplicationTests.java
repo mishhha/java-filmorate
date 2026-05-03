@@ -400,41 +400,42 @@ class FilmorateApplicationTests {
 				.hasMessageContaining("не найден");
 	}
 
-	// Получение рекомендаций для пользователя
-	@Test
-	void testGetRecommendations() {
-		List<Film> films = userService.getRecommendations(3L);
-		assertTrue(films.size() == 2);
-	}
-	// Получение списка событий по пользователю
-	@Test
-	void testGetEventList() {
-		User user1 = new User();
-		user1.setEmail("testUser1@mail.ru");
-		user1.setLogin("testUser1");
-		user1.setName("Test User 1");
-		user1.setBirthday(LocalDate.of(1995, 5, 5));
-		user1 = userService.addUser(user1);
+    // Получение рекомендаций для пользователя
+    @Test
+    void testGetRecommendations() {
+        List<Film> films = userService.getRecommendations(3L);
+        assertTrue(films.size() == 2);
+    }
 
-		User user2 = new User();
-		user2.setEmail("testUser2@mail.ru");
-		user2.setLogin("testUser2");
-		user2.setName("Test User 2");
-		user2.setBirthday(LocalDate.of(1995, 5, 5));
-		user2 = userService.addUser(user2);
+    // Получение списка событий по пользователю
+    @Test
+    void testGetEventList() {
+        User user1 = new User();
+        user1.setEmail("testUser1@mail.ru");
+        user1.setLogin("testUser1");
+        user1.setName("Test User 1");
+        user1.setBirthday(LocalDate.of(1995, 5, 5));
+        user1 = userService.addUser(user1);
 
-		userService.addFriend(user1.getId(), user2.getId());
-		userService.deleteFriend(user1.getId(), user2.getId());
+        User user2 = new User();
+        user2.setEmail("testUser2@mail.ru");
+        user2.setLogin("testUser2");
+        user2.setName("Test User 2");
+        user2.setBirthday(LocalDate.of(1995, 5, 5));
+        user2 = userService.addUser(user2);
 
-		List<Event> events = userService.getEventList(user1.getId());
-		assertTrue(events != null && !events.isEmpty(), "Ошибка получения событий");
-	}
+        userService.addFriend(user1.getId(), user2.getId());
+        userService.deleteFriend(user1.getId(), user2.getId());
 
-	// Получение списка событий по несуществующему пользователю
-	@Test
-	void testGetEventList_notFound() {
-		assertThatThrownBy(() -> userService.getEventList(999L))
-				.isInstanceOf(NotFoundException.class)
-				.hasMessageContaining("не найден");
-	}
+        List<Event> events = userService.getEventList(user1.getId());
+        assertTrue(events != null && !events.isEmpty(), "Ошибка получения событий");
+    }
+
+    // Получение списка событий по несуществующему пользователю
+    @Test
+    void testGetEventList_notFound() {
+        assertThatThrownBy(() -> userService.getEventList(999L))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("не найден");
+    }
 }
