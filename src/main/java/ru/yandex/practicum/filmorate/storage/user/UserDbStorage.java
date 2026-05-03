@@ -31,66 +31,67 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbc;
     private final UserRowMapper rowMapper;
+    private final EventRowMapper rowEventMapper;
 
     private static final String FIND_ALL = """
-        SELECT * FROM users
-    """;
+                SELECT * FROM users
+            """;
 
     private static final String FIND_BY_ID = """
-        SELECT * FROM users WHERE id = ?
-    """;
+                SELECT * FROM users WHERE id = ?
+            """;
 
     private static final String INSERT_USER_QUERY = """
-        INSERT INTO users (name, email, login, birthday) VALUES (?, ?, ?, ?)
-    """;
+                INSERT INTO users (name, email, login, birthday) VALUES (?, ?, ?, ?)
+            """;
 
     private static final String INSERT_FRIENDS_USER_QUERY = """
-        INSERT INTO friendships (user_id, friend_id, status_id) VALUES (?, ?, ?)
-    """;
+                INSERT INTO friendships (user_id, friend_id, status_id) VALUES (?, ?, ?)
+            """;
 
     private static final String UPDATE_USER_QUERY = """
-        UPDATE users SET name = ?, login = ?, email = ?, birthday = ? WHERE id = ?
-    """;
+                UPDATE users SET name = ?, login = ?, email = ?, birthday = ? WHERE id = ?
+            """;
 
     private static final String DELETE_FRIEND_BY_ID_QUERY = """
-        DELETE FROM friendships WHERE user_id = ? AND friend_id = ?
-    """;
+                DELETE FROM friendships WHERE user_id = ? AND friend_id = ?
+            """;
 
     private static final String FIND_FRIENDS_QUERY = """
-        SELECT u.*
-        FROM users AS u
-        JOIN friendships AS f ON u.id = f.friend_id
-        WHERE f.user_id = ?
-    """;
+                SELECT u.*
+                FROM users AS u
+                JOIN friendships AS f ON u.id = f.friend_id
+                WHERE f.user_id = ?
+            """;
 
     private static final String FIND_COMMON_FRIENDS = """
-        SELECT u.*
-        FROM users AS u
-        JOIN friendships AS f ON u.id = f.friend_id
-        WHERE f.user_id IN (?, ?)
-        GROUP BY u.id
-        HAVING COUNT(*) > 1
-    """;
+                SELECT u.*
+                FROM users AS u
+                JOIN friendships AS f ON u.id = f.friend_id
+                WHERE f.user_id IN (?, ?)
+                GROUP BY u.id
+                HAVING COUNT(*) > 1
+            """;
 
     private static final String DELETE_USER_BY_ID_QUERY = """
-        DELETE FROM users WHERE id = ?
-    """;
+                DELETE FROM users WHERE id = ?
+            """;
 
     private static final String CHECK_USER_EXISTS_BY_ID = """
-        SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
-    """;
+                SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+            """;
 
     private static final String GET_LIKE_FILM_BY_USER = """
-        SELECT film_id FROM likes WHERE user_id = ?
-        """;
+            SELECT film_id FROM likes WHERE user_id = ?
+            """;
 
     private static final String INSERT_EVENT_QUERY = """
-        INSERT INTO events (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?)
-    """;
+                INSERT INTO events (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?)
+            """;
 
     private static final String GET_EVENTS_BY_USER_ID = """
-        SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC
-    """;
+                SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC
+            """;
 
     @Override
     public void deleteUserById(Long userId) {
@@ -107,11 +108,11 @@ public class UserDbStorage implements UserStorage {
         getUserById(user.getId());
 
         jdbc.update(UPDATE_USER_QUERY,
-            user.getName(),
-            user.getLogin(),
-            user.getEmail(),
-            user.getBirthday(),
-            user.getId()
+                user.getName(),
+                user.getLogin(),
+                user.getEmail(),
+                user.getBirthday(),
+                user.getId()
         );
 
         return getUserById(user.getId());
@@ -124,7 +125,7 @@ public class UserDbStorage implements UserStorage {
 
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                INSERT_USER_QUERY, Statement.RETURN_GENERATED_KEYS
+                    INSERT_USER_QUERY, Statement.RETURN_GENERATED_KEYS
             );
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
@@ -140,13 +141,21 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getUsers() {
-        return jdbc.query(FIND_ALL, rowMapper);
+        List<User> users = jdbc.query(FIND_ALL, rowMapper);
+        users.stream().forEach(user -> {
+            user.setLikesFilms(getFilmsLike(user.getId()));
+        });
+
+        return users;
     }
 
     @Override
     public User getUserById(Long id) {
         try {
-            return jdbc.queryForObject(FIND_BY_ID, rowMapper, id);
+            User user = jdbc.queryForObject(FIND_BY_ID, rowMapper, id);
+            user.setLikesFilms(getFilmsLike(id));
+
+            return user;
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
@@ -190,7 +199,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     private void checkUserExistsById(Long userId) throws NotFoundException {
-        boolean checkUser =  jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
+        boolean checkUser = jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
 
         if (!checkUser) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");

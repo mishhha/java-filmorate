@@ -10,8 +10,10 @@ import ru.yandex.practicum.filmorate.model.user.EventOperations;
 import ru.yandex.practicum.filmorate.model.user.EventTypes;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -128,5 +130,9 @@ public class UserService {
         return filmIds.stream()
                 .map(filmStorage::getFilmById)
                 .toList();
+    }
+
+    public List<Event> getEventList(Long userId) {
+        return userStorage.getEventList(userId);
     }
 }
