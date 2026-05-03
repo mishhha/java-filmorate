@@ -80,7 +80,7 @@ public class UserController {
 
     /*
     Рекомендации фильмов для пользователя, по схожим интересам других пользователей
-     */
+    */
     @GetMapping("/{id}/recommendations")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getRecommendations(
