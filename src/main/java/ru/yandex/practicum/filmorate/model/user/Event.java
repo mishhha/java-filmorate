@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class Event {
     private Long id;
     @JsonFormat(shape = JsonFormat.Shape.NUMBER, timezone = "UTC")
-    private Instant timestamp;
+    private Long timestamp;
     private Long userId;
     private EventTypes eventType;
     private EventOperations operation;
