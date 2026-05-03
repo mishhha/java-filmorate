@@ -18,6 +18,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -86,7 +87,7 @@ public class UserDbStorage implements UserStorage {
             """;
 
     private static final String INSERT_EVENT_QUERY = """
-                INSERT INTO events (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?)
+                INSERT INTO events (timestamp, user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?, ?)
             """;
 
     private static final String GET_EVENTS_BY_USER_ID = """
@@ -214,10 +215,11 @@ public class UserDbStorage implements UserStorage {
             PreparedStatement ps = connection.prepareStatement(
                     INSERT_EVENT_QUERY, new String[]{"id"}
             );
-            ps.setLong(1, event.getUserId());
-            ps.setString(2, event.getEventType().name());
-            ps.setString(3, event.getOperation().name());
-            ps.setLong(4, event.getEntityId());
+            ps.setLong(1, Instant.now().toEpochMilli());
+            ps.setLong(2, event.getUserId());
+            ps.setString(3, event.getEventType().name());
+            ps.setString(4, event.getOperation().name());
+            ps.setLong(5, event.getEntityId());
             return ps;
         }, keyHolder);
 
