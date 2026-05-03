@@ -5,7 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Film.
@@ -21,7 +23,7 @@ public class Film {
     private List<Genre> genres = new ArrayList<>();
     @JsonProperty("mpa")
     private RatingMpa rating;
-    private List<Director> directors = new ArrayList<>();
+    private Set<Director> directors = new HashSet<>();
 
     public void addLike() {
         ++likes;

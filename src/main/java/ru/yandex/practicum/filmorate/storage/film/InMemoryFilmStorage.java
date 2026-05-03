@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.film.DirectorFilmsSort;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.DirectorService;
@@ -111,13 +110,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getDirectorFilms(Long directorId, DirectorFilmsSort sortBy) {
+    public List<Film> getDirectorFilms(Long directorId, String sortBy) {
         Comparator<Film> sortByComparator;
-        switch (sortBy) {
-            case LIKES:
+        switch (sortBy.toLowerCase()) {
+            case "likes":
                 sortByComparator = (film1, film2) -> (int) (film2.getLikes() - film1.getLikes());
                 break;
-            case YEAR:
+            case "year":
                 sortByComparator = (film1, film2) -> {
                     if (film2.getReleaseDate().isAfter(film1.getReleaseDate())) {
                         return 1;

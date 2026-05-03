@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Director;
-import ru.yandex.practicum.filmorate.model.film.DirectorFilmsSort;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.storage.mappers.DirectorRowMapper;
@@ -325,13 +324,13 @@ public class FilmDbStorage implements FilmStorage {
         return new ArrayList<>(genres);
     }
 
-    private List<Director> getDirectorsByFilmId(Long filmId) {
+    private Set<Director> getDirectorsByFilmId(Long filmId) {
         List<Director> directors = jdbc.query(
             FIND_DIRECTORS_BY_FILM_ID,
             directorRowMapper,
             filmId
         );
-        return new ArrayList<>(directors);
+        return new HashSet<>(directors);
     }
 
     @Override
@@ -362,22 +361,21 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getDirectorFilms(Long directorId, DirectorFilmsSort sortBy) {
+    public List<Film> getDirectorFilms(Long directorId, String sortBy) {
         boolean checkDirector = jdbc.queryForObject(CHECK_DIRECTOR_EXISTS_BY_ID, Boolean.class, directorId);
         if (!checkDirector) {
             throw new NotFoundException("Режиссёр с id " + directorId + " не найден");
         }
 
-        String strSortBy;
-        String strSortType;
-        switch (sortBy) {
-            case LIKES:
-                strSortBy = "likes_count";
-                strSortType = "DESC";
+        String sortType;
+        switch (sortBy.toLowerCase()) {
+            case "likes":
+                sortBy = "likes_count";
+                sortType = "DESC";
                 break;
-            case YEAR:
-                strSortBy = "release_date";
-                strSortType = "ASC";
+            case "year":
+                sortBy = "release_date";
+                sortType = "ASC";
                 break;
             default:
                 throw new ValidationException("Тип сортировки не распознан");
@@ -399,7 +397,7 @@ public class FilmDbStorage implements FilmStorage {
         WHERE fd.director_id = ?
         GROUP BY f.id, f.%s
         ORDER BY f.%s %s
-        """, strSortBy, strSortBy, strSortType);
+        """, sortBy, sortBy, sortType);
 
         List<Film> films = jdbc.query(findDirectorFilms, filmRowMapper, directorId);
         for (Film film : films) {

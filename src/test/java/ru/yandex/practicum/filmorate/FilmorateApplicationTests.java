@@ -9,7 +9,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.film.*;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.RatingMpa;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
@@ -25,6 +28,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -274,7 +278,7 @@ class FilmorateApplicationTests {
 		Director director2 = new Director();
 		director2.setId(2L);
 
-		newFilm.setDirectors(List.of(director1, director2));
+		newFilm.setDirectors(Set.of(director1, director2));
 
 		Film created = filmStorage.addFilm(newFilm);
 
@@ -335,7 +339,7 @@ class FilmorateApplicationTests {
 		filmToUpdate.setDuration(150);
 		filmToUpdate.setGenres(List.of(drama, action));
 		filmToUpdate.setRating(ratingPg13);
-		filmToUpdate.setDirectors(List.of(director1, director2));
+		filmToUpdate.setDirectors(Set.of(director1, director2));
 
 		Film updated = filmStorage.updateFilm(filmToUpdate);
 
@@ -437,7 +441,7 @@ class FilmorateApplicationTests {
 	// Получение списка фильмов определённого режиссёра, отсортированные по лайкам
 	@Test
 	void testGetDirectorFilms_sortedByLikes() {
-		List<Film> films = filmStorage.getDirectorFilms(1L, DirectorFilmsSort.LIKES);
+		List<Film> films = filmStorage.getDirectorFilms(1L, "likes");
 
 		assertThat(films).isNotNull();
 		assertThat(films).isNotEmpty();
@@ -448,7 +452,7 @@ class FilmorateApplicationTests {
 	// Получение списка фильмов определённого режиссёра, отсортированные по годам
 	@Test
 	void testGetDirectorFilms_sortedByYear() {
-		List<Film> films = filmStorage.getDirectorFilms(2L, DirectorFilmsSort.YEAR);
+		List<Film> films = filmStorage.getDirectorFilms(2L, "year");
 
 		assertThat(films).isNotNull();
 		assertThat(films).isNotEmpty();

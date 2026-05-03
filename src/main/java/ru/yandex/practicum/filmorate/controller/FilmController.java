@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.film.DirectorFilmsSort;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -78,7 +78,9 @@ public class FilmController {
     @GetMapping("/director/{directorId}")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getDirectorFilms(@PathVariable @Positive Long directorId, @RequestParam String sortBy) {
-        DirectorFilmsSort directorFilmsSort = DirectorFilmsSort.from(sortBy);
-        return filmService.getDirectorFilms(directorId, directorFilmsSort);
+        if (!List.of("likes", "year").contains(sortBy.toLowerCase())) {
+            throw new ValidationException("некорректный параметр сортировки. Доступны: likes, year");
+        }
+        return filmService.getDirectorFilms(directorId, sortBy);
     }
 }

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.film.DirectorFilmsSort;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -97,10 +96,7 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    public List<Film> getDirectorFilms(Long directorId, DirectorFilmsSort sortBy) {
-        if (sortBy == null) {
-            throw new ValidationException("Некорректный тип сортировки. Доступны: year, likes");
-        }
+    public List<Film> getDirectorFilms(Long directorId, String sortBy) {
         return filmStorage.getDirectorFilms(directorId, sortBy);
     }
 }
