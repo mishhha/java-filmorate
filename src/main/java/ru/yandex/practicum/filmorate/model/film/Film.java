@@ -21,6 +21,7 @@ public class Film {
     private List<Genre> genres = new ArrayList<>();
     @JsonProperty("mpa")
     private RatingMpa rating;
+    private List<Director> directors = new ArrayList<>();
 
     public void addLike() {
         ++likes;
