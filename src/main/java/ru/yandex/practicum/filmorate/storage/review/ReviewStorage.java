@@ -15,4 +15,8 @@ public interface ReviewStorage {
     Review getById(Long id);
 
     List<Review> getAll();
+
+    void addReaction(Long reviewId, Long userId, Boolean isPositive);
+
+    void deleteReaction(Long reviewId, Long userId);
 }

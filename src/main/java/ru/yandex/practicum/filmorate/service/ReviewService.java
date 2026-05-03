@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.model.user.Event;
@@ -24,15 +22,11 @@ public class ReviewService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
-    private Map<Long, Map<Long, Integer>> reviewLikes = new HashMap<>();
-
     public Review create(Review review) {
         validate(review);
 
         userStorage.getUserById(review.getUserId());
         filmStorage.getFilmById(review.getFilmId());
-
-        review.setUseful(0);
 
         review = reviewStorage.create(review);
 
@@ -48,11 +42,8 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
-        if (review.getReviewId() == null) {
-            throw new ValidationException("ReviewId is null");
-        }
-        getReviewOrThrow(review.getReviewId());
         validate(review);
+
         review = reviewStorage.update(review);
 
         //Добавление события в историю
@@ -67,10 +58,9 @@ public class ReviewService {
     }
 
     public void delete(Long id) {
-        Review review = getReviewOrThrow(id);
+        Review review = reviewStorage.getById(id);
 
         reviewStorage.delete(id);
-        reviewLikes.remove(id);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -81,12 +71,12 @@ public class ReviewService {
                 .build());
     }
 
-
     public Review getById(Long id) {
-        return getReviewOrThrow(id);
+        return reviewStorage.getById(id);
     }
 
     public List<Review> getAll(Long filmId, int count) {
+
         return reviewStorage.getAll().stream()
                 .filter(r -> filmId == null ||
                         (r.getFilmId() != null && r.getFilmId().equals(filmId)))
@@ -96,21 +86,8 @@ public class ReviewService {
     }
 
 
-    public Review addLike(Long reviewId, Long userId) {
-        Review review = getReviewOrThrow(reviewId);
-
-        reviewLikes.putIfAbsent(reviewId, new HashMap<>());
-        Map<Long, Integer> map = reviewLikes.get(reviewId);
-
-        Integer old = map.get(userId);
-
-        if (old == null) {
-            map.put(userId, 1);
-            review.setUseful(review.getUseful() + 1);
-        } else if (old == -1) {
-            map.put(userId, 1);
-            review.setUseful(review.getUseful() + 2);
-        }
+    public void addLike(Long reviewId, Long userId) {
+        reviewStorage.addReaction(reviewId, userId, true);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -119,26 +96,10 @@ public class ReviewService {
                 .operation(EventOperations.ADD)
                 .entityId(reviewId)
                 .build());
-
-        return review;
     }
 
-
-    public Review addDislike(Long reviewId, Long userId) {
-        Review review = getReviewOrThrow(reviewId);
-
-        reviewLikes.putIfAbsent(reviewId, new HashMap<>());
-        Map<Long, Integer> map = reviewLikes.get(reviewId);
-
-        Integer old = map.get(userId);
-
-        if (old == null) {
-            map.put(userId, -1);
-            review.setUseful(review.getUseful() - 1);
-        } else if (old == 1) {
-            map.put(userId, -1);
-            review.setUseful(review.getUseful() - 2);
-        }
+    public void addDislike(Long reviewId, Long userId) {
+        reviewStorage.addReaction(reviewId, userId, false);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -147,24 +108,10 @@ public class ReviewService {
                 .operation(EventOperations.ADD)
                 .entityId(reviewId)
                 .build());
-
-        return review;
     }
 
-
-    public Review removeLike(Long reviewId, Long userId) {
-        Review review = getReviewOrThrow(reviewId);
-
-        Map<Long, Integer> map = reviewLikes.get(reviewId);
-        if (map == null) return review;
-
-        Integer old = map.remove(userId);
-
-        if (old != null && old == 1) {
-            review.setUseful(review.getUseful() - 1);
-        } else if (old != null && old == -1) {
-            review.setUseful(review.getUseful() + 1);
-        }
+    public void removeLike(Long reviewId, Long userId) {
+        reviewStorage.deleteReaction(reviewId, userId);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -173,24 +120,10 @@ public class ReviewService {
                 .operation(EventOperations.REMOVE)
                 .entityId(reviewId)
                 .build());
-
-        return review;
     }
 
-
-    public Review removeDislike(Long reviewId, Long userId) {
-        Review review = getReviewOrThrow(reviewId);
-
-        Map<Long, Integer> map = reviewLikes.get(reviewId);
-        if (map == null) return review;
-
-        Integer old = map.remove(userId);
-
-        if (old != null && old == -1) {
-            review.setUseful(review.getUseful() + 1);
-        } else if (old != null && old == 1) {
-            review.setUseful(review.getUseful() - 1);
-        }
+    public void removeDislike(Long reviewId, Long userId) {
+        reviewStorage.deleteReaction(reviewId, userId);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -199,31 +132,20 @@ public class ReviewService {
                 .operation(EventOperations.REMOVE)
                 .entityId(reviewId)
                 .build());
-
-        return review;
     }
-
 
     private void validate(Review review) {
         if (review.getContent() == null || review.getContent().isBlank()) {
-            throw new ValidationException("Content is empty");
+            throw new ValidationException("Текст отзыва пустой");
         }
         if (review.getUserId() == null) {
-            throw new ValidationException("UserId is null");
+            throw new ValidationException("Пользователь не найден");
         }
         if (review.getFilmId() == null) {
-            throw new ValidationException("FilmId is null");
+            throw new ValidationException("Фильм не найден");
         }
         if (review.getIsPositive() == null) {
-            throw new ValidationException("IsPositive is null");
+            throw new ValidationException("Реакция не указана");
         }
-    }
-
-    private Review getReviewOrThrow(Long id) {
-        Review review = reviewStorage.getById(id);
-        if (review == null) {
-            throw new NotFoundException("Review not found");
-        }
-        return review;
     }
 }

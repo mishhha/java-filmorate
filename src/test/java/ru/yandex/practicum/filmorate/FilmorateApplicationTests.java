@@ -84,7 +84,7 @@ class FilmorateApplicationTests {
 
 		assertThat(users).isNotNull();
 		assertThat(users).isNotEmpty();
-		assertThat(users).hasSize(3);
+		assertThat(users).hasSize(5);
 		assertThat(users.get(0).getEmail()).isEqualTo("test@mail.ru");
 	}
 
