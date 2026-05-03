@@ -8,6 +8,12 @@ import java.util.List;
 @Service
 public interface FilmStorage {
 
+    public List<Film> searchFilmByDirector(String director);
+
+    public List<Film> findFilmsByPopular();
+
+    public List<Film> searchFilmBySubstring(String nameFilm);
+
     public void deleteFilmById(Long filmId);
 
     List<Film> getFilms();

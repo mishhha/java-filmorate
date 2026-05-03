@@ -62,6 +62,20 @@ public class FilmDbStorage implements FilmStorage {
         LIMIT ?
         """;
 
+    private static final String SEARCH_TOP_FILMS_QUERY = """
+        SELECT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        ORDER BY f.likes_count DESC
+        """;
+
     private static final String FIND_GENRES_BY_FILM_ID = """
         SELECT g.id,
                g.name
@@ -161,8 +175,39 @@ public class FilmDbStorage implements FilmStorage {
         SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
         """;
 
+    private static final String FIND_NAME_FILM_BY_SUBSTRING  = """
+        SELECT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               f.mpa_rating_id,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        WHERE f.name ILIKE ?
+        """;
+
+    private static final String FIND_NAME_FILM_BY_DIRECTOR  = """
+        SELECT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               f.mpa_rating_id,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        WHERE f.description ILIKE ?
+        """;
+
+
     private static final String CHECK_USER_EXISTS_BY_ID = """
-        SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+        SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
     """;
 
     private static final String CHECK_DIRECTOR_EXISTS_BY_ID = """
@@ -173,6 +218,23 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
     private final DirectorRowMapper directorRowMapper;
+
+    @Override
+    public List<Film> findFilmsByPopular() {
+        return jdbc.query(SEARCH_TOP_FILMS_QUERY, filmRowMapper);
+    }
+
+    @Override
+    public List<Film> searchFilmBySubstring(String nameFilm) {
+        String pattern = "%" + nameFilm + "%";
+        return jdbc.query(FIND_NAME_FILM_BY_SUBSTRING, filmRowMapper, pattern);
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String director) {
+        String pattern = "%" + director + "%";
+        return jdbc.query(FIND_NAME_FILM_BY_DIRECTOR, filmRowMapper, pattern);
+    }
 
     @Override
     public void deleteFilmById(Long filmId) {

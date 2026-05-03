@@ -27,6 +27,25 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
+    public List<Film> searchTopFilms() {
+        return filmStorage.findFilmsByPopular();
+    }
+
+    public List<Film> searchFilmBySubstring(String nameFilm, String by) {
+        if (by == null || by.isBlank()) {
+            List<Film> searchFilms = filmStorage.searchFilmBySubstring(nameFilm);
+            if (searchFilms == null) {
+                throw new NotFoundException("Фильма с названием " + nameFilm + " не найдено.");
+            }
+            return searchFilms;
+        }
+        String[] param = by.split(",");
+        if(param[1] == null || param[1].isBlank()) {
+            return filmStorage.searchFilmByDirector(param[0]);
+        }
+
+    }
+
     public void deleteFilmById(Long filmId) {
         filmStorage.deleteFilmById(filmId);
     }

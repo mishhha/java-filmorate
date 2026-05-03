@@ -31,6 +31,20 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> findFilmsByPopular() {
+        return films.values().stream()
+            .sorted(Comparator.comparingLong(Film::getLikes).reversed())
+            .toList();
+    }
+
+    @Override
+    public List<Film> searchFilmBySubstring(String nameFilm) {
+        return films.values().stream()
+            .filter(film -> film.getName().toLowerCase().contains(nameFilm.toLowerCase()))
+            .toList();
+    }
+
+    @Override
     public void deleteFilmById(Long filmId) {
         films.remove(filmId);
     }
