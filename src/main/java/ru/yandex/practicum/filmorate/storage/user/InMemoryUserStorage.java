@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,7 +107,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void addEvent(Event event) {
         event.setId(eventFeed.size() + 1L);
-        event.setTimestamp(LocalDateTime.now());
+        event.setTimestamp(Instant.now());
         eventFeed.put(event.getId(), event);
 
         log.info("Зарегистрирована операция {} по событию {}", event.getOperation(), event.getEventType());
