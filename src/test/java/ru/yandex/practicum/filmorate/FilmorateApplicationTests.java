@@ -381,6 +381,31 @@ class FilmorateApplicationTests {
 			.hasMessageContaining("не найден");
 	}
 
+	// Получение общих фильмов
+	@Test
+	void testGetCommonFilms() {
+		List<Film> commonFilms = filmStorage.getCommonFilms(1L, 2L);
+
+		assertThat(commonFilms).isNotNull();
+		assertThat(commonFilms).isNotEmpty();
+		assertThat(commonFilms).hasSize(2);
+		assertThat(commonFilms.getFirst().getId()).isEqualTo(2L);
+	}
+
+	// Получение рекомендаций по несуществующему пользователю
+	@Test
+	void testGetRecommendations_notFound() {
+		assertThatThrownBy(() -> userService.getRecommendations(999L))
+				.isInstanceOf(NotFoundException.class)
+				.hasMessageContaining("не найден");
+	}
+
+	// Получение рекомендаций для пользователя
+	@Test
+	void testGetRecommendations() {
+		List<Film> films = userService.getRecommendations(3L);
+		assertTrue(films.size() == 2);
+	}
 	// Получение списка событий по пользователю
 	@Test
 	void testGetEventList() {

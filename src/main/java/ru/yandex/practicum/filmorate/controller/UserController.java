@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -77,6 +78,16 @@ public class UserController {
         return userService.getCommonFriend(id, otherId);
     }
 
+    /*
+    Рекомендации фильмов для пользователя, по схожим интересам других пользователей
+     */
+    @GetMapping("/{id}/recommendations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getRecommendations(
+            @PathVariable @PositiveOrZero Long id
+    ) {
+        return userService.getRecommendations(id);
+    }
     @GetMapping("/{id}/feed")
     @ResponseStatus(HttpStatus.OK)
     public List<Event> getEventList(

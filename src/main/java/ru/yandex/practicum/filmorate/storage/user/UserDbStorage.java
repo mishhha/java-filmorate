@@ -19,6 +19,8 @@ import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Primary
@@ -29,7 +31,6 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbc;
     private final UserRowMapper rowMapper;
-    private final EventRowMapper rowEventMapper;
 
     private static final String FIND_ALL = """
         SELECT * FROM users
@@ -78,6 +79,10 @@ public class UserDbStorage implements UserStorage {
     private static final String CHECK_USER_EXISTS_BY_ID = """
         SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
     """;
+
+    private static final String GET_LIKE_FILM_BY_USER = """
+        SELECT film_id FROM likes WHERE user_id = ?
+        """;
 
     private static final String INSERT_EVENT_QUERY = """
         INSERT INTO events (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?)
@@ -177,6 +182,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getCommonFriends(Long id, Long otherId) {
         return jdbc.query(FIND_COMMON_FRIENDS, rowMapper, id, otherId);
+    }
+
+    public Set<Long> getFilmsLike(Long userId) {
+        List<Long> entityList = jdbc.query(GET_LIKE_FILM_BY_USER, (rs, rowNum) -> rs.getLong("film_id"), userId);
+        return entityList.stream().collect(Collectors.toSet());
     }
 
     private void checkUserExistsById(Long userId) throws NotFoundException {
