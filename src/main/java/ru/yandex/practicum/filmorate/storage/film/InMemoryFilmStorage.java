@@ -3,8 +3,9 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
-import ru.yandex.practicum.filmorate.model.user.User;
+
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
+
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
@@ -35,17 +37,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.remove(filmId);
     }
 
-
     @Override
     public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
-
         return films.values().stream()
                 .filter(film -> genreId == null ||
                         film.getGenres().stream()
                                 .anyMatch(g -> g.getId().equals(genreId)))
                 .filter(film -> year == null ||
                         film.getReleaseDate().getYear() == year)
-                .sorted(Comparator.comparingLong(Film::getLikes).reversed())
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -63,7 +63,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         films.put(film.getId(), film);
-        log.info("Фильм с названием {} создан.", film.getName());
+        log.info("Фильм {} создан.", film.getName());
         return film;
     }
 
@@ -77,19 +77,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        User user = userService.getUsersById(userId);
+        userService.getUsersById(userId);
 
-        film.addLike();
-        user.addLikesFilms(filmId);
+        film.addLike(userId);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        User user = userService.getUsersById(userId);
+        userService.getUsersById(userId);
 
-        film.dislike();
-        user.getLikesFilms().remove(filmId);
+        film.removeLike(userId);
     }
 
     public long nextIdGenerate() {
@@ -101,43 +99,46 @@ public class InMemoryFilmStorage implements FilmStorage {
         return ++nextId;
     }
 
+
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        Set<Long> friendFilmList = userService.getUsersById(friendId).getLikesFilms();
+        Set<Long> friendFilms = userService.getUsersById(friendId).getLikesFilms();
 
         return userService.getUsersById(userId).getLikesFilms().stream()
-                .filter(friendFilmList::contains)
+                .filter(friendFilms::contains)
                 .map(films::get)
                 .filter(Objects::nonNull)
-                .sorted((film1, film2) -> (int) (film2.getLikes() - film1.getLikes()))
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Film> getDirectorFilms(Long directorId, String sortBy) {
-        Comparator<Film> sortByComparator;
+
+        Director director = directorService.getDirectorById(directorId);
+
+        Comparator<Film> comparator;
+
         switch (sortBy.toLowerCase()) {
             case "likes":
-                sortByComparator = (film1, film2) -> (int) (film2.getLikes() - film1.getLikes());
+                comparator = Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed();
                 break;
+
             case "year":
-                sortByComparator = (film1, film2) -> {
-                    if (film2.getReleaseDate().isAfter(film1.getReleaseDate())) {
-                        return 1;
-                    } else if (film2.getReleaseDate().isBefore(film1.getReleaseDate())) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                };
+                comparator = Comparator.comparing(Film::getReleaseDate);
                 break;
+
             default:
                 throw new ValidationException("Тип сортировки не распознан");
         }
 
         return films.values().stream()
-                .filter(film -> film.getDirectors().contains(directorService.getDirectorById(directorId)))
-                .sorted(sortByComparator)
+                .filter(film -> film.getDirectors().contains(director))
+                .sorted(comparator)
                 .collect(Collectors.toList());
     }
 }
+
+
+
+

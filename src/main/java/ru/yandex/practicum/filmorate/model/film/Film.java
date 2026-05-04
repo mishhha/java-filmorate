@@ -1,3 +1,4 @@
+
 package ru.yandex.practicum.filmorate.model.film;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,29 +10,39 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Film.
- */
 @Data
 public class Film {
+
     private Long id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private long likes;
+
+
+    private Set<Long> likes = new HashSet<>();
+
     private List<Genre> genres = new ArrayList<>();
+
     @JsonProperty("mpa")
     private RatingMpa rating;
+
     private Set<Director> directors = new HashSet<>();
 
-    public void addLike() {
-        ++likes;
+
+    public void addLike(Long userId) {
+        likes.add(userId);
     }
 
-    public void dislike() {
-        --likes;
+    public void removeLike(Long userId) {
+        likes.remove(userId);
     }
+
+
+    public int getLikesCount() {
+        return likes.size();
+    }
+
 
     public void addGenre(Genre genre) {
         genres.add(genre);
@@ -40,5 +51,4 @@ public class Film {
     public void removeGenre(Genre genre) {
         genres.remove(genre);
     }
-
 }
