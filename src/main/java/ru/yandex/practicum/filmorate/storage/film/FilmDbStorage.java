@@ -91,6 +91,25 @@ public class FilmDbStorage implements FilmStorage {
             WHERE f.id = ?
             """;
 
+    private static final String FIND_COMMON_FILMS = """
+        SELECT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               f.mpa_rating_id,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        JOIN likes AS l ON f.id = l.film_id
+        WHERE l.user_id IN (?, ?)
+        GROUP BY f.id
+        HAVING COUNT(*) > 1
+        ORDER BY f.likes_count DESC
+        """;
+
     private static final String INSERT_FILM_QUERY = """
             INSERT INTO films (name, description, release_date, duration, mpa_rating_id) VALUES (?, ?, ?, ?, ?)
             """;
@@ -130,6 +149,10 @@ public class FilmDbStorage implements FilmStorage {
     private static final String CHECK_FILM_EXISTS_BY_ID_QUERY = """
         SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
         """;
+
+    private static final String CHECK_USER_EXISTS_BY_ID = """
+        SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+    """;
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;

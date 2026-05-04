@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.RatingMpa;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
@@ -27,9 +28,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
-@Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class})
+@Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class, UserService.class})
 @AutoConfigureTestDatabase
 class FilmorateApplicationTests {
 
@@ -40,6 +42,9 @@ class FilmorateApplicationTests {
 	@Autowired
 	@Qualifier("filmDbStorage")
 	private FilmStorage filmStorage;
+
+	@Autowired
+	private UserService userService;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -229,7 +234,7 @@ class FilmorateApplicationTests {
 		// Assert
 		assertThat(films).isNotNull();
 		assertThat(films).isNotEmpty();
-		assertThat(films).hasSize(1);
+		assertThat(films).hasSize(4);
 		assertThat(films.get(0).getName()).isEqualTo("Test Film");
 	}
 
@@ -374,5 +379,29 @@ class FilmorateApplicationTests {
 			.hasMessageContaining("не найден");
 	}
 
+	// Получение общих фильмов
+	@Test
+	void testGetCommonFilms() {
+		List<Film> commonFilms = filmStorage.getCommonFilms(1L, 2L);
 
+		assertThat(commonFilms).isNotNull();
+		assertThat(commonFilms).isNotEmpty();
+		assertThat(commonFilms).hasSize(2);
+		assertThat(commonFilms.getFirst().getId()).isEqualTo(2L);
+	}
+
+	// Получение рекомендаций по несуществующему пользователю
+	@Test
+	void testGetRecommendations_notFound() {
+		assertThatThrownBy(() -> userService.getRecommendations(999L))
+				.isInstanceOf(NotFoundException.class)
+				.hasMessageContaining("не найден");
+	}
+
+	// Получение рекомендаций для пользователя
+	@Test
+	void testGetRecommendations() {
+		List<Film> films = userService.getRecommendations(3L);
+		assertTrue(films.size() == 2);
+	}
 }

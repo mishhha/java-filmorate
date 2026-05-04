@@ -4,10 +4,13 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -15,9 +18,12 @@ import java.util.List;
 public class UserService {
 
     private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage) {
         this.userStorage = userStorage;
+        this.filmStorage = filmStorage;
     }
 
     public void deleteUserById(Long userId) {
@@ -61,4 +67,47 @@ public class UserService {
         return userStorage.getCommonFriends(id, otherId);
     }
 
+    public List<Film> getRecommendations(Long userId) {
+        User currentUser = userStorage.getUserById(userId);
+        Set<Long> currentUserLikes = currentUser.getLikesFilms();
+
+        User similarUser = null;
+        long maxTotalLikes = 0;
+
+        //Поиск пользователей с максимальным количеством пересечения по лайкам.
+        for (User otherUser : userStorage.getUsers()) {
+            //Если текущий пользователь, пропускаем итерацию
+            if (otherUser.getId().equals(currentUser.getId())) {
+                continue;
+            }
+
+            //Список лайков другого пользователя
+            Set<Long> otherUserLikes = otherUser.getLikesFilms();
+
+            //Подсчет общих лайков
+            long totalLikes = currentUserLikes.stream()
+                    .filter(otherUserLikes::contains)
+                    .count();
+
+            if (totalLikes > maxTotalLikes) {
+                maxTotalLikes = totalLikes;
+                similarUser = otherUser;
+            }
+
+        }
+
+        // Если нет схожего по интересам пользователя
+        if (similarUser == null) {
+            return List.of();
+        }
+
+        //Идентификаторы рекомендованных фильмов
+        List<Long> filmIds = similarUser.getLikesFilms().stream()
+                .filter(filmId -> !currentUserLikes.contains(filmId))
+                .toList();
+
+        return filmIds.stream()
+                .map(filmStorage::getFilmById)
+                .toList();
+    }
 }

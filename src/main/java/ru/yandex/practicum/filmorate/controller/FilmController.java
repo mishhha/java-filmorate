@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class FilmController {
 
     @DeleteMapping("/{filmId}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteUserById(@PathVariable @PositiveOrZero Long filmId) {
+    public void deleteFilmById(@PathVariable @PositiveOrZero Long filmId) {
         filmService.deleteFilmById(filmId);
     }
 
