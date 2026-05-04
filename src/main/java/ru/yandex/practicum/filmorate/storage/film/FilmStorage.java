@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.List;
 
-@Service
+
 public interface FilmStorage {
 
     public void deleteFilmById(Long filmId);
