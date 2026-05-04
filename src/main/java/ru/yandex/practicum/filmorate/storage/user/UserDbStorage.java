@@ -7,7 +7,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -25,8 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Primary
-@Repository
-@Component("userDbStorage")
+@Repository("userDbStorage")
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 

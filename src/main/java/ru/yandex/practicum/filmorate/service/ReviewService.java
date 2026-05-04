@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.EventOperations;
@@ -23,61 +22,57 @@ public class ReviewService {
     private final FilmStorage filmStorage;
 
     public Review create(Review review) {
-        validate(review);
-
         userStorage.getUserById(review.getUserId());
         filmStorage.getFilmById(review.getFilmId());
 
-        review = reviewStorage.create(review);
+        review = reviewStorage.addReview(review);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.ADD)
-                .entityId(review.getReviewId())
+                .entityId(review.getId())
                 .build());
 
         return review;
     }
 
     public Review update(Review review) {
-        validate(review);
-
-        review = reviewStorage.update(review);
+        review = reviewStorage.updateReview(review);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.UPDATE)
-                .entityId(review.getReviewId())
+                .entityId(review.getId())
                 .build());
 
         return review;
     }
 
     public void delete(Long id) {
-        Review review = reviewStorage.getById(id);
+        Review review = reviewStorage.getReviewById(id);
 
-        reviewStorage.delete(id);
+        reviewStorage.deleteReviewById(id);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.REMOVE)
-                .entityId(review.getReviewId())
+                .entityId(review.getId())
                 .build());
     }
 
     public Review getById(Long id) {
-        return reviewStorage.getById(id);
+        return reviewStorage.getReviewById(id);
     }
 
     public List<Review> getAll(Long filmId, int count) {
 
-        return reviewStorage.getAll().stream()
+        return reviewStorage.getReviews().stream()
                 .filter(r -> filmId == null ||
                         (r.getFilmId() != null && r.getFilmId().equals(filmId)))
                 .sorted(Comparator.comparingInt(Review::getUseful).reversed())
@@ -85,9 +80,8 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-
     public void addLike(Long reviewId, Long userId) {
-        reviewStorage.addReaction(reviewId, userId, true);
+        reviewStorage.saveReaction(reviewId, userId, true);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -99,7 +93,7 @@ public class ReviewService {
     }
 
     public void addDislike(Long reviewId, Long userId) {
-        reviewStorage.addReaction(reviewId, userId, false);
+        reviewStorage.saveReaction(reviewId, userId, false);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
@@ -132,20 +126,5 @@ public class ReviewService {
                 .operation(EventOperations.REMOVE)
                 .entityId(reviewId)
                 .build());
-    }
-
-    private void validate(Review review) {
-        if (review.getContent() == null || review.getContent().isBlank()) {
-            throw new ValidationException("Текст отзыва пустой");
-        }
-        if (review.getUserId() == null) {
-            throw new ValidationException("Пользователь не найден");
-        }
-        if (review.getFilmId() == null) {
-            throw new ValidationException("Фильм не найден");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Реакция не указана");
-        }
     }
 }

@@ -25,8 +25,7 @@ import java.util.Set;
 
 @Slf4j
 @Primary
-@Repository
-@Component("filmDbStorage")
+@Repository("filmDbStorage")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
