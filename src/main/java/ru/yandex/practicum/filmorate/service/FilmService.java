@@ -88,8 +88,8 @@ public class FilmService {
         filmStorage.removeLike(id, userId);
     }
 
-    public List<Film> getTopFilmsByLikes(int count, Long genreId, Integer year) {
-        return filmStorage.getTopFilms(count, genreId, year);
+    public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
+        return filmStorage.getPopularFilms(count, genreId, year);
     }
 
      public List<Film> getCommonFilms(Long userId, Long friendId) {
