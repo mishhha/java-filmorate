@@ -3,36 +3,21 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.film.Film;
-import ru.yandex.practicum.filmorate.model.user.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
-import java.util.stream.Collectors;
+
+import java.util.*;
+
 
 @Slf4j
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final HashMap<Long, Film> films = new HashMap<>();
-
-    private final UserService userService;
-
-    public InMemoryFilmStorage(UserService userService) {
-        this.userService = userService;
-    }
+    private final Map<Long, Film> films = new HashMap<>();
 
     @Override
     public void deleteFilmById(Long filmId) {
         films.remove(filmId);
     }
-
-
-
 
     @Override
     public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
@@ -63,7 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         films.put(film.getId(), film);
-        log.info("Фильм с названием {} создан.", film.getName());
+        log.info("Фильм {} создан.", film.getName());
         return film;
     }
 
@@ -77,19 +62,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        User user = userService.getUsersById(userId);
-
         film.addLike();
-        user.addLikesFilms(filmId);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        User user = userService.getUsersById(userId);
-
         film.dislike();
-        user.getLikesFilms().remove(filmId);
     }
 
     public long nextIdGenerate() {
@@ -103,13 +82,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        Set<Long> friendFilmList = userService.getUsersById(friendId).getLikesFilms();
-
-        return userService.getUsersById(userId).getLikesFilms().stream()
-                .filter(friendFilmList::contains)
-                .map(films::get)
-                .filter(Objects::nonNull)
-                .sorted((film1, film2) -> (int) (film2.getLikes() - film1.getLikes()))
-                .collect(Collectors.toList());
+        return List.of();
     }
 }
