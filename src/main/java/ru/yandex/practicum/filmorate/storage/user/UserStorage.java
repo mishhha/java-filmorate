@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.Event;
 
 import java.util.List;
 
-@Service
 public interface UserStorage {
 
     void deleteUserById(Long userId);

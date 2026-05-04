@@ -82,29 +82,29 @@ public class ReviewDbStorage implements ReviewStorage {
                     INSERT_REVIEW, Statement.RETURN_GENERATED_KEYS
             );
             ps.setString(1, review.getContent());
-            ps.setByte(2, (byte) (review.getIsPositive() ? 1 : -1));
+            ps.setBoolean(2, review.getIsPositive());
             ps.setLong(3, review.getUserId());
             ps.setLong(4, review.getFilmId());
             return ps;
         }, keyHolder);
 
-        review.setId(keyHolder.getKey().longValue());
+        review.setReviewId(keyHolder.getKey().longValue());
 
-        return getReviewById(review.getId());
+        return getReviewById(review.getReviewId());
     }
 
     @Override
     public Review updateReview(Review review) {
-        getReviewById(review.getId());
+        getReviewById(review.getReviewId());
 
         jdbc.update(UPDATE_REVIEW,
                 review.getContent(),
                 review.getIsPositive(),
                 review.getUserId(),
                 review.getFilmId(),
-                review.getId());
+                review.getReviewId());
 
-        return getReviewById(review.getId());
+        return getReviewById(review.getReviewId());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class ReviewDbStorage implements ReviewStorage {
                 review.getReactions().put(rs.getLong("user_id"),
                         rs.getByte("reaction"));
 
-            });
+            }, review.getReviewId());
         }
 
         return reviews;

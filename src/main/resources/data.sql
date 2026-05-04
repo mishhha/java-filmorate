@@ -42,8 +42,7 @@ VALUES (2, 1),
        (4, 1),
        (2, 2),
        (3, 2),
-       (2, 3),
-       (1, 3);
+       (2, 3);
 
 INSERT INTO film_genres (film_id, genre_id) VALUES (1, 1);
 

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.EventOperations;
@@ -22,6 +23,7 @@ public class ReviewService {
     private final FilmStorage filmStorage;
 
     public Review create(Review review) {
+
         userStorage.getUserById(review.getUserId());
         filmStorage.getFilmById(review.getFilmId());
 
@@ -32,13 +34,17 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.ADD)
-                .entityId(review.getId())
+                .entityId(review.getReviewId())
                 .build());
 
         return review;
     }
 
     public Review update(Review review) {
+        if (review.getReviewId() == null) {
+            throw new ValidationException("Идентификатор отзыва не может быть пустым");
+        }
+
         review = reviewStorage.updateReview(review);
 
         //Добавление события в историю
@@ -46,7 +52,7 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.UPDATE)
-                .entityId(review.getId())
+                .entityId(review.getReviewId())
                 .build());
 
         return review;
@@ -62,7 +68,7 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.REMOVE)
-                .entityId(review.getId())
+                .entityId(review.getReviewId())
                 .build());
     }
 

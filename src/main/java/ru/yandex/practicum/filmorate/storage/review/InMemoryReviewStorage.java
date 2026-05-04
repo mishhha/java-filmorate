@@ -16,18 +16,18 @@ public class InMemoryReviewStorage implements ReviewStorage {
 
     @Override
     public Review addReview(Review review) {
-        review.setId(reviews.size() + 1L);
-        reviews.put(review.getId(), review);
+        review.setReviewId(nextIdGenerate());
+        reviews.put(review.getReviewId(), review);
         return review;
     }
 
     @Override
     public Review updateReview(Review review) {
-        if (!reviews.containsKey(review.getId())) {
+        if (!reviews.containsKey(review.getReviewId())) {
             throw new NotFoundException("Отзыв пользователя не найден");
         }
 
-        reviews.put(review.getId(), review);
+        reviews.put(review.getReviewId(), review);
         return review;
     }
 
@@ -74,5 +74,14 @@ public class InMemoryReviewStorage implements ReviewStorage {
         }
 
         review.getReactions().remove(userId);
+    }
+
+    private long nextIdGenerate() {
+        long nextId = reviews.keySet().stream()
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(0L);
+
+        return ++nextId;
     }
 }

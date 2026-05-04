@@ -2,26 +2,29 @@ package ru.yandex.practicum.filmorate.model.review;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
 @Builder
 public class Review {
-    private Long id;
+    private Long reviewId;
     @NotBlank(message = "Текст отзыва пустой")
     private String content;
-    @NotBlank(message = "Реакция пользователя не может быть пустой")
+    @NotNull(message = "Реакция пользователя не может быть пустой")
     private Boolean isPositive;
-    @NotBlank(message = "Ид пользователя не может быть пустым")
+    @NotNull(message = "Ид пользователя не может быть пустым")
     private Long userId;
-    @NotBlank(message = "Ид фильма не может быть пустым")
+    @NotNull(message = "Ид фильма не может быть пустым")
     private Long filmId;
 
     @JsonIgnore
-    private Map<Long, Byte> reactions;
+    @Builder.Default
+    private Map<Long, Byte> reactions = new HashMap<>();
 
     public Integer getUseful() {
         if (reactions == null || reactions.isEmpty()) {
