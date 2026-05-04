@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.Objects;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Component("inMemoryFilmStorage")
@@ -29,14 +27,14 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getTopFilms(int count, Long genreId, Integer year) {
-        return getFilms().stream()
+        return films.values().stream()
                 .filter(film -> genreId == null
                         || (film.getGenres() != null &&
                         film.getGenres().stream()
                                 .anyMatch(g -> g.getId().equals(genreId))))
                 .filter(film -> year == null
                         || film.getReleaseDate().getYear() == year)
-                .sorted(Comparator.comparing(Film::getLikes).reversed())
+                .sorted(Comparator.comparingLong(Film::getLikes).reversed())
                 .limit(count)
                 .toList();
     }

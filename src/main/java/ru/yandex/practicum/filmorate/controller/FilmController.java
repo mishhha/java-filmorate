@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,7 +11,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import java.util.List;
 
 @Slf4j
-@Data
 @RestController
 @RequestMapping("/films")
 @RequiredArgsConstructor
@@ -53,13 +50,15 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void addLike(@PathVariable @PositiveOrZero Long id,
+                        @PathVariable @PositiveOrZero Long userId) {
         filmService.userLikesFilm(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void disLike(@PathVariable @PositiveOrZero Long id,
+                        @PathVariable @PositiveOrZero Long userId) {
         filmService.userDislikesFilm(id, userId);
     }
 
