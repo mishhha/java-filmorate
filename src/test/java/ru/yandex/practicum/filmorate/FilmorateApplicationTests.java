@@ -16,12 +16,11 @@ import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.storage.mappers.*;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -35,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
-@Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class, UserService.class})
+@Import({ UserDbStorage.class, FilmDbStorage.class, DirectorDbStorage.class, FilmRowMapper.class, GenreRowMapper.class, UserRowMapper.class, DirectorRowMapper.class, EventRowMapper.class, UserService.class})
 @AutoConfigureTestDatabase
 class FilmorateApplicationTests {
 
@@ -90,7 +89,7 @@ class FilmorateApplicationTests {
 
 		assertThat(users).isNotNull();
 		assertThat(users).isNotEmpty();
-		assertThat(users).hasSize(3);
+		assertThat(users).hasSize(5);
 		assertThat(users.get(0).getEmail()).isEqualTo("test@mail.ru");
 	}
 
@@ -369,7 +368,7 @@ class FilmorateApplicationTests {
 
 		Film film = filmStorage.getFilmById(1L);
 		assertThat(film).isNotNull();
-		assertThat(film.getLikes()).isEqualTo(1);
+		assertThat(film.getLikes()).isEqualTo(2);
 
 		Integer likesInDb = jdbcTemplate.queryForObject(
 			"SELECT COUNT(*) FROM likes WHERE film_id = ? AND user_id = ?",
@@ -386,13 +385,13 @@ class FilmorateApplicationTests {
 
 		// Проверяем, что лайк добавился
 		Film filmBefore = filmStorage.getFilmById(1L);
-		assertThat(filmBefore.getLikes()).isEqualTo(1);
+		assertThat(filmBefore.getLikes()).isEqualTo(2);
 
 		filmStorage.removeLike(1L, 1L);
 
 		Film filmAfter = filmStorage.getFilmById(1L);
 		assertThat(filmAfter).isNotNull();
-		assertThat(filmAfter.getLikes()).isEqualTo(0);
+		assertThat(filmAfter.getLikes()).isEqualTo(1);
 
 		Integer likesInDb = jdbcTemplate.queryForObject(
 			"SELECT COUNT(*) FROM likes WHERE film_id = ? AND user_id = ?",
