@@ -22,10 +22,10 @@ public class Review {
     private Long filmId;
 
     @JsonIgnore
-    private Map<Long, Byte> reactions = new HashMap<>();
+    private Map<Long, Byte> reactions;
 
     public Integer getUseful() {
-        if (reactions.isEmpty()) {
+        if (reactions == null || reactions.isEmpty()) {
             return 0;
         }
 

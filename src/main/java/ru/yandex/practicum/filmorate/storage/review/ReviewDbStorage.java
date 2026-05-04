@@ -126,7 +126,7 @@ public class ReviewDbStorage implements ReviewStorage {
             jdbc.query(GET_REACTIONS_BY_ID, rs -> {
                 review.getReactions().put(rs.getLong("user_id"),
                         rs.getByte("reaction"));
-            });
+            }, id);
 
             return review;
         } catch (EmptyResultDataAccessException e) {
