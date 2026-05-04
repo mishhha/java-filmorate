@@ -27,12 +27,12 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable @PositiveOrZero Long id) {
+    public void delete(@PathVariable Long id) {
         service.delete(id);
     }
 
     @GetMapping("/{id}")
-    public Review getById(@PathVariable @PositiveOrZero Long id) {
+    public Review getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
@@ -45,22 +45,22 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void like(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void like(@PathVariable Long id, @PathVariable Long userId) {
         service.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    public void dislike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void dislike(@PathVariable Long id, @PathVariable Long userId) {
         service.addDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
         service.removeLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    public void removeDislike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void removeDislike(@PathVariable Long id, @PathVariable Long userId) {
         service.removeDislike(id, userId);
     }
 }
