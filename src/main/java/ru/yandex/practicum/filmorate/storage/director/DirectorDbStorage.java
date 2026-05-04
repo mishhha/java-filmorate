@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Director;
@@ -18,8 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Primary
-@Repository
-@Component("directorDbStorage")
+@Repository("directorDbStorage")
 @RequiredArgsConstructor
 public class DirectorDbStorage implements DirectorStorage {
 

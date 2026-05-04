@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Director;
 
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
-@Component("inMemoryDirectorStorage")
+@Repository("inMemoryDirectorStorage")
 public class InMemoryDirectorStorage implements DirectorStorage {
 
     private final HashMap<Long, Director> directors = new HashMap<>();
