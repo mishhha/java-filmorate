@@ -92,7 +92,7 @@ public class FilmService {
         return filmStorage.getTopFilms(count, genreId, year);
     }
 
-     /*public List<Film> getCommonFilms(Long userId, Long friendId) {
-        return filmStorage.getCommonFilms(userId, friendId);
-    }*/
+     public List<Film> getCommonFilms(Long userId, Long friendId) {
+         return filmStorage.getCommonFilms(userId, friendId);
+     }
 }

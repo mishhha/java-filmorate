@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("inMemoryFilmStorage")
@@ -24,21 +26,26 @@ public class InMemoryFilmStorage implements FilmStorage {
         this.userService = userService;
     }
 
+    @Override
+    public void deleteFilmById(Long filmId) {
+        films.remove(filmId);
+    }
+
 
     @Override
     public List<Film> getTopFilms(int count, Long genreId, Integer year) {
+
         return films.values().stream()
-                .filter(film -> genreId == null
-                        || (film.getGenres() != null &&
-                        film.getGenres().stream()
-                                .anyMatch(g -> g.getId().equals(genreId))))
-                .filter(film -> year == null
-                        || film.getReleaseDate().getYear() == year)
+                .filter(film -> genreId == null ||
+                        (film.getGenres() != null &&
+                                film.getGenres().stream()
+                                        .anyMatch(g -> g.getId().equals(genreId))))
+                .filter(film -> year == null ||
+                        film.getReleaseDate().getYear() == year)
                 .sorted(Comparator.comparingLong(Film::getLikes).reversed())
                 .limit(count)
                 .toList();
     }
-
 
     @Override
     public List<Film> getFilms() {
@@ -92,7 +99,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilmById(Long filmId) {
-        films.remove(filmId);
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        Set<Long> friendFilmList = userService.getUsersById(friendId).getLikesFilms();
+
+        return userService.getUsersById(userId).getLikesFilms().stream()
+                .filter(friendFilmList::contains)
+                .map(films::get)
+                .filter(Objects::nonNull)
+                .sorted((film1, film2) -> (int) (film2.getLikes() - film1.getLikes()))
+                .collect(Collectors.toList());
     }
 }

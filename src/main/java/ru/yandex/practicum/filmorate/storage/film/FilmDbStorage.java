@@ -28,6 +28,8 @@ import java.util.Set;
 @Repository
 @Component("filmDbStorage")
 @RequiredArgsConstructor
+
+
 public class FilmDbStorage implements FilmStorage {
 
     private static final String FIND_ALL = """
@@ -44,7 +46,6 @@ public class FilmDbStorage implements FilmStorage {
             ORDER BY f.id
             """;
 
-
     private static final String FIND_TOP_FILMS_QUERY = """
             SELECT f.id,
                    f.name,
@@ -54,15 +55,8 @@ public class FilmDbStorage implements FilmStorage {
                    f.likes_count,
                    m.id AS rating_id,
                    m.name AS rating_name
-            FROM films f
-            LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
-            WHERE (? IS NULL OR EXISTS (
-                SELECT 1
-                FROM film_genres fg
-                WHERE fg.film_id = f.id
-                  AND fg.genre_id = ?
-            ))
-              AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
+            FROM films AS f
+            LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
             ORDER BY f.likes_count DESC
             LIMIT ?
             """;
@@ -92,23 +86,23 @@ public class FilmDbStorage implements FilmStorage {
             """;
 
     private static final String FIND_COMMON_FILMS = """
-        SELECT f.id,
-               f.name,
-               f.description,
-               f.release_date,
-               f.duration,
-               f.likes_count,
-               f.mpa_rating_id,
-               m.id AS rating_id,
-               m.name AS rating_name
-        FROM films AS f
-        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
-        JOIN likes AS l ON f.id = l.film_id
-        WHERE l.user_id IN (?, ?)
-        GROUP BY f.id
-        HAVING COUNT(*) > 1
-        ORDER BY f.likes_count DESC
-        """;
+            SELECT f.id,
+                   f.name,
+                   f.description,
+                   f.release_date,
+                   f.duration,
+                   f.likes_count,
+                   f.mpa_rating_id,
+                   m.id AS rating_id,
+                   m.name AS rating_name
+            FROM films AS f
+            LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+            JOIN likes AS l ON f.id = l.film_id
+            WHERE l.user_id IN (?, ?)
+            GROUP BY f.id
+            HAVING COUNT(*) > 1
+            ORDER BY f.likes_count DESC
+            """;
 
     private static final String INSERT_FILM_QUERY = """
             INSERT INTO films (name, description, release_date, duration, mpa_rating_id) VALUES (?, ?, ?, ?, ?)
@@ -143,16 +137,16 @@ public class FilmDbStorage implements FilmStorage {
             """;
 
     private static final String DELETE_FILM_BY_ID_QUERY = """
-        DELETE FROM films WHERE id = ?
-        """;
+            DELETE FROM films WHERE id = ?
+            """;
 
     private static final String CHECK_FILM_EXISTS_BY_ID_QUERY = """
-        SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
-        """;
+            SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
+            """;
 
     private static final String CHECK_USER_EXISTS_BY_ID = """
-        SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
-    """;
+                SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+            """;
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
@@ -178,6 +172,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getTopFilms(int count, Long genreId, Integer year) {
+
         return jdbc.query(
                 FIND_TOP_FILMS_QUERY,
                 filmRowMapper,
@@ -186,7 +181,6 @@ public class FilmDbStorage implements FilmStorage {
                 count
         );
     }
-
 
     @Override
     public Film getFilmById(Long id) {
@@ -292,6 +286,17 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(UPDATE_DISLIKES_FILM, filmId);
     }
 
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        boolean checkUser = jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
+        if (!checkUser) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
-
+        List<Film> films = jdbc.query(FIND_COMMON_FILMS, filmRowMapper, userId, friendId);
+        for (Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+        }
+        return films;
+    }
 }
