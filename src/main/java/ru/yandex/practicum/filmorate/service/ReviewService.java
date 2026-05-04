@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.EventOperations;
@@ -22,6 +23,8 @@ public class ReviewService {
     private final FilmStorage filmStorage;
 
     public Review create(Review review) {
+        validate(review);
+
         userStorage.getUserById(review.getUserId());
         filmStorage.getFilmById(review.getFilmId());
 
@@ -39,6 +42,12 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
+        if (review.getId() == null) {
+            throw new ValidationException("Идентификатор отзыва не может быть пустым");
+        }
+
+        validate(review);
+
         review = reviewStorage.updateReview(review);
 
         //Добавление события в историю
@@ -126,5 +135,20 @@ public class ReviewService {
                 .operation(EventOperations.REMOVE)
                 .entityId(reviewId)
                 .build());
+    }
+
+    private void validate(Review review) {
+        if (review.getContent() == null || review.getContent().isBlank()) {
+            throw new ValidationException("Содержание отзыва пустое");
+        }
+        if (review.getUserId() == null) {
+            throw new ValidationException("Не указан идентификатор пользователя");
+        }
+        if (review.getFilmId() == null) {
+            throw new ValidationException("Не указан идентификатор фильма");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Не указано состояние отзыва");
+        }
     }
 }
