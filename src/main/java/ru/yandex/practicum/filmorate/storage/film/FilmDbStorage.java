@@ -9,8 +9,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.storage.mappers.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
 
@@ -28,6 +31,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
+    private final DirectorRowMapper directorRowMapper;
 
 
     private static final String FIND_TOP_FILMS_QUERY = """
@@ -149,6 +153,15 @@ public class FilmDbStorage implements FilmStorage {
         films.forEach(this::attachGenres);
 
         return films;
+    }
+
+    private Set<Director> getDirectorsByFilmId(Long filmId) {
+        List<Director> directors = jdbc.query(
+            FIND_DIRECTORS_BY_FILM_ID,
+            directorRowMapper,
+            filmId
+        );
+        return new HashSet<>(directors);
     }
 
     @Override
