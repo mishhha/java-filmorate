@@ -82,7 +82,7 @@ public class ReviewDbStorage implements ReviewStorage {
                     INSERT_REVIEW, Statement.RETURN_GENERATED_KEYS
             );
             ps.setString(1, review.getContent());
-            ps.setByte(2, (byte) (review.getIsPositive() ? 1 : -1));
+            ps.setBoolean(2, review.getIsPositive());
             ps.setLong(3, review.getUserId());
             ps.setLong(4, review.getFilmId());
             return ps;
