@@ -169,6 +169,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void deleteReaction(Long reviewId, Long userId) {
+
+
         boolean check = jdbc.queryForObject(CHECK_REACTION_EXISTS_BY_ID, Boolean.class, reviewId, userId);
         if (!check) {
             throw new NotFoundException(String.format("Реакция пользователя %s к отзыву %s не найдена", userId, reviewId));
