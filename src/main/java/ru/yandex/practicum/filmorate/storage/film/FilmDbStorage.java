@@ -21,14 +21,13 @@ import java.util.*;
 
 @Slf4j
 @Primary
-@Repository
+@Repository("filmDbStorage")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
-
 
 
     private static final String FIND_TOP_FILMS_QUERY = """
@@ -58,7 +57,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String EXISTS_USER = "SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)";
     private static final String EXISTS_FILM = "SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)";
-
 
 
     @Override
@@ -176,18 +174,18 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Film> films = jdbc.query(
                 """
-                SELECT f.id, f.name, f.description, f.release_date, f.duration,
-                       f.likes_count,
-                       m.id AS rating_id,
-                       m.name AS rating_name
-                FROM films f
-                LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
-                JOIN likes l ON f.id = l.film_id
-                WHERE l.user_id IN (?, ?)
-                GROUP BY f.id
-                HAVING COUNT(*) > 1
-                ORDER BY f.likes_count DESC
-                """,
+                        SELECT f.id, f.name, f.description, f.release_date, f.duration,
+                               f.likes_count,
+                               m.id AS rating_id,
+                               m.name AS rating_name
+                        FROM films f
+                        LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
+                        JOIN likes l ON f.id = l.film_id
+                        WHERE l.user_id IN (?, ?)
+                        GROUP BY f.id
+                        HAVING COUNT(*) > 1
+                        ORDER BY f.likes_count DESC
+                        """,
                 filmRowMapper,
                 userId, friendId
         );
@@ -205,7 +203,6 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbc.update("DELETE FROM films WHERE id = ?", filmId);
     }
-
 
 
     private void attachGenres(Film film) {

@@ -74,17 +74,16 @@ public class UserService {
         User similarUser = null;
         long maxTotalLikes = 0;
 
-        //Поиск пользователей с максимальным количеством пересечения по лайкам.
+
         for (User otherUser : userStorage.getUsers()) {
-            //Если текущий пользователь, пропускаем итерацию
+
             if (otherUser.getId().equals(currentUser.getId())) {
                 continue;
             }
 
-            //Список лайков другого пользователя
+
             Set<Long> otherUserLikes = otherUser.getLikesFilms();
 
-            //Подсчет общих лайков
             long totalLikes = currentUserLikes.stream()
                     .filter(otherUserLikes::contains)
                     .count();
@@ -96,12 +95,12 @@ public class UserService {
 
         }
 
-        // Если нет схожего по интересам пользователя
+
         if (similarUser == null) {
             return List.of();
         }
 
-        //Идентификаторы рекомендованных фильмов
+
         List<Long> filmIds = similarUser.getLikesFilms().stream()
                 .filter(filmId -> !currentUserLikes.contains(filmId))
                 .toList();
