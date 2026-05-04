@@ -10,7 +10,7 @@ import java.util.Map;
 @Data
 @Builder
 public class Review {
-    private Long id;
+    private Long reviewId;
     @NotBlank(message = "Текст отзыва пустой")
     private String content;
     @NotBlank(message = "Реакция пользователя не может быть пустой")

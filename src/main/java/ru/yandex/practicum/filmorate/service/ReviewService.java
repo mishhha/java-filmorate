@@ -35,14 +35,14 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.ADD)
-                .entityId(review.getId())
+                .entityId(review.getReviewId())
                 .build());
 
         return review;
     }
 
     public Review update(Review review) {
-        if (review.getId() == null) {
+        if (review.getReviewId() == null) {
             throw new ValidationException("Идентификатор отзыва не может быть пустым");
         }
 
@@ -55,7 +55,7 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.UPDATE)
-                .entityId(review.getId())
+                .entityId(review.getReviewId())
                 .build());
 
         return review;
@@ -71,7 +71,7 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.REMOVE)
-                .entityId(review.getId())
+                .entityId(review.getReviewId())
                 .build());
     }
 

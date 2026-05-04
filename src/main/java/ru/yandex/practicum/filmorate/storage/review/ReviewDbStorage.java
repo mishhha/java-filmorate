@@ -88,23 +88,23 @@ public class ReviewDbStorage implements ReviewStorage {
             return ps;
         }, keyHolder);
 
-        review.setId(keyHolder.getKey().longValue());
+        review.setReviewId(keyHolder.getKey().longValue());
 
-        return getReviewById(review.getId());
+        return getReviewById(review.getReviewId());
     }
 
     @Override
     public Review updateReview(Review review) {
-        getReviewById(review.getId());
+        getReviewById(review.getReviewId());
 
         jdbc.update(UPDATE_REVIEW,
                 review.getContent(),
                 review.getIsPositive(),
                 review.getUserId(),
                 review.getFilmId(),
-                review.getId());
+                review.getReviewId());
 
-        return getReviewById(review.getId());
+        return getReviewById(review.getReviewId());
     }
 
     @Override
