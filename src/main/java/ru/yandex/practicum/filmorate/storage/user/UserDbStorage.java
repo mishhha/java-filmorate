@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Primary
-@Repository
-@Component("userDbStorage")
+@Repository("userDbStorage")
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 

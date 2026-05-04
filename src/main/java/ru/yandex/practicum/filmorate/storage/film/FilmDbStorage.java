@@ -175,7 +175,7 @@ public class FilmDbStorage implements FilmStorage {
         SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
         """;
 
-    private static final String FIND_NAME_FILM_BY_SUBSTRING  = """
+    private static final String FIND_NAME_FILM_BY_SUBSTRING = """
         SELECT f.id,
                f.name,
                f.description,
@@ -190,25 +190,7 @@ public class FilmDbStorage implements FilmStorage {
         WHERE f.name ILIKE ?
         """;
 
-    private static final String FIND_NAME_FILM_BY_DIRECTOR  = """
-        SELECT f.id,
-               f.name,
-               f.description,
-               f.release_date,
-               f.duration,
-               f.likes_count,
-               f.mpa_rating_id,
-               m.id AS rating_id,
-               m.name AS rating_name
-        FROM films AS f
-        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
-        WHERE f.description ILIKE ?
-        """;
-
-
-    private static final String CHECK_USER_EXISTS_BY_ID = """
-        SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
-    """;
+    // Составной запрос + SQL инъекции(защита)
 
     private static final String CHECK_DIRECTOR_EXISTS_BY_ID = """
         SELECT EXISTS (SELECT 1, FROM directors WHERE id = ?)
@@ -225,15 +207,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> searchFilmBySubstring(String nameFilm) {
-        String pattern = "%" + nameFilm + "%";
-        return jdbc.query(FIND_NAME_FILM_BY_SUBSTRING, filmRowMapper, pattern);
-    }
-
-    @Override
-    public List<Film> searchFilmByDirector(String director) {
-        String pattern = "%" + director + "%";
-        return jdbc.query(FIND_NAME_FILM_BY_DIRECTOR, filmRowMapper, pattern);
+    public List<Film> searchFilmBySubstring(String query) {
+        return jdbc.query(FIND_NAME_FILM_BY_SUBSTRING, filmRowMapper, "%" + query + "%");
     }
 
     @Override
@@ -409,7 +384,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        boolean checkUser = jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID, Boolean.class, userId);
+        boolean checkUser = jdbc.queryForObject(CHECK_FILM_EXISTS_BY_ID_QUERY, Boolean.class, userId);
         if (!checkUser) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }

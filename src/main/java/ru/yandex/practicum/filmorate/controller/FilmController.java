@@ -26,7 +26,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     public List<Film> findFilmByName(
         @RequestParam (required = false) String query,
-        @RequestParam(required = false, defaultValue = "title,director") String by
+        @RequestParam (required = false) String by
     ) {
         if(query == null || query.isBlank()) {
             return filmService.searchTopFilms();

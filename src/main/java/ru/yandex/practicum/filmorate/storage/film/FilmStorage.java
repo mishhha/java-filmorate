@@ -1,20 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.List;
 
-@Service
 public interface FilmStorage {
 
-    public List<Film> searchFilmByDirector(String director);
+    List<Film> searchFilmByDirector(String director);
 
-    public List<Film> findFilmsByPopular();
+    List<Film> findFilmsByPopular();
 
-    public List<Film> searchFilmBySubstring(String nameFilm);
+    List<Film> searchFilmBySubstring(String nameFilm);
 
-    public void deleteFilmById(Long filmId);
+    void deleteFilmById(Long filmId);
 
     List<Film> getFilms();
 
@@ -26,9 +24,9 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
-    public void addLike(Long filmId, Long userId);
+    void addLike(Long filmId, Long userId);
 
-    public void removeLike(Long filmId, Long userId);
+    void removeLike(Long filmId, Long userId);
 
     public List<Film> getCommonFilms(Long userId, Long friendId);
 

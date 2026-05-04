@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.RatingMpa;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -28,6 +29,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     public InMemoryFilmStorage(UserService userService, DirectorService directorService) {
         this.userService = userService;
         this.directorService = directorService;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String director) {
+        if (director != null && !director.isBlank()) {
+            return films.values().stream()
+                .filter(film -> film.getDirector() != null && film.getDirector().equalsIgnoreCase(director))
+                .toList();
+        }
+        return List.of();
     }
 
     @Override

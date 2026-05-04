@@ -12,8 +12,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
 @Slf4j
+@Service
 public class FilmService {
 
     private final FilmStorage filmStorage;
@@ -33,16 +33,13 @@ public class FilmService {
 
     public List<Film> searchFilmBySubstring(String nameFilm, String by) {
         if (by == null || by.isBlank()) {
-            List<Film> searchFilms = filmStorage.searchFilmBySubstring(nameFilm);
+            List<Film> searchFilms = filmStorage.searchFilmBySubstring(nameFilm.toLowerCase());
             if (searchFilms == null) {
                 throw new NotFoundException("Фильма с названием " + nameFilm + " не найдено.");
             }
             return searchFilms;
         }
         String[] param = by.split(",");
-        if(param[1] == null || param[1].isBlank()) {
-            return filmStorage.searchFilmByDirector(param[0]);
-        }
 
     }
 
