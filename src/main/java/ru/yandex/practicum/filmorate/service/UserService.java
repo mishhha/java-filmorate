@@ -20,7 +20,7 @@ public class UserService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
-    public UserService( UserStorage userStorage,
+    public UserService(UserStorage userStorage,
                        FilmStorage filmStorage) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
