@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -13,6 +15,12 @@ import java.util.*;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
+
+    private final UserService userService;
+
+    public InMemoryFilmStorage(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void deleteFilmById(Long filmId) {
@@ -80,8 +88,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         return ++nextId;
     }
 
+
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        return List.of();
+        Set<Long> friendFilmList = userService.getUsersById(friendId).getLikesFilms();
+        return userService.getUsersById(userId).getLikesFilms().stream().
+                filter(friendFilmList::contains).map(films::get).
+                filter(Objects::nonNull).sorted((film1, film2) -> (int) (film2.getLikes() - film1.getLikes()))
+                .collect(Collectors.toList());
     }
 }
