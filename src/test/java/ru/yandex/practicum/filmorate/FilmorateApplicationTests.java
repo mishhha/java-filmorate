@@ -13,16 +13,14 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.RatingMpa;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.Director;
+import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.DirectorRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.storage.mappers.*;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -36,8 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
-@Import({UserDbStorage.class, UserRowMapper.class, FilmDbStorage.class, FilmRowMapper.class, GenreRowMapper.class,
-		UserService.class, DirectorDbStorage.class, DirectorRowMapper.class})
+@Import({ UserDbStorage.class, FilmDbStorage.class, DirectorDbStorage.class, FilmRowMapper.class, GenreRowMapper.class, UserRowMapper.class, DirectorRowMapper.class, EventRowMapper.class, UserService.class})
 @AutoConfigureTestDatabase
 class FilmorateApplicationTests {
 
@@ -92,7 +89,7 @@ class FilmorateApplicationTests {
 
 		assertThat(users).isNotNull();
 		assertThat(users).isNotEmpty();
-		assertThat(users).hasSize(3);
+		assertThat(users).hasSize(5);
 		assertThat(users.get(0).getEmail()).isEqualTo("test@mail.ru");
 	}
 
@@ -436,6 +433,38 @@ class FilmorateApplicationTests {
 	void testGetRecommendations() {
 		List<Film> films = userService.getRecommendations(3L);
 		assertTrue(films.size() == 2);
+	}
+
+	// Получение списка событий по пользователю
+	@Test
+	void testGetEventList() {
+		User user1 = new User();
+		user1.setEmail("testUser1@mail.ru");
+		user1.setLogin("testUser1");
+		user1.setName("Test User 1");
+		user1.setBirthday(LocalDate.of(1995, 5, 5));
+		user1 = userService.addUser(user1);
+
+		User user2 = new User();
+		user2.setEmail("testUser2@mail.ru");
+		user2.setLogin("testUser2");
+		user2.setName("Test User 2");
+		user2.setBirthday(LocalDate.of(1995, 5, 5));
+		user2 = userService.addUser(user2);
+
+		userService.addFriend(user1.getId(), user2.getId());
+		userService.deleteFriend(user1.getId(), user2.getId());
+
+		List<Event> events = userService.getEventList(user1.getId());
+		assertTrue(events != null && !events.isEmpty(), "Ошибка получения событий");
+	}
+
+	// Получение списка событий по несуществующему пользователю
+	@Test
+	void testGetEventList_notFound() {
+		assertThatThrownBy(() -> userService.getEventList(999L))
+				.isInstanceOf(NotFoundException.class)
+				.hasMessageContaining("не найден");
 	}
 
 	// Получение списка фильмов определённого режиссёра, отсортированные по лайкам

@@ -1,18 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component("inMemoryUserStorage")
+@Repository("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Long, User> users = new HashMap<>();
+    private final HashMap<Long, Event> eventFeed = new HashMap<>();
 
     @Override
     public void deleteUserById(Long userId) {
@@ -99,7 +102,22 @@ public class InMemoryUserStorage implements UserStorage {
             .map(users::get)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
 
+    @Override
+    public void addEvent(Event event) {
+        event.setId(eventFeed.size() + 1L);
+        event.setTimestamp(Instant.now().toEpochMilli());
+        eventFeed.put(event.getId(), event);
+
+        log.info("Зарегистрирована операция {} по событию {}", event.getOperation(), event.getEventType());
+    }
+
+    @Override
+    public List<Event> getEventList(Long userId) {
+        return eventFeed.values().stream()
+                .filter(event -> userId.equals(event.getUserId()))
+                .toList();
     }
 
     public long nextIdGenerate() {

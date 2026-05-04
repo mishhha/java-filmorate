@@ -21,7 +21,9 @@ INSERT INTO friendship_statuses (id, name) VALUES
 INSERT INTO users (id, name, email, login, birthday) VALUES
     (1, 'Test User', 'test@mail.ru', 'test_login', '1990-01-01'),
     (2, 'Second User', 'second@mail.ru', 'second_login', '1992-03-03'),
-    (3, 'Third User', 'third@mail.ru', 'third_login', '1995-05-05');
+    (3, 'Third User', 'third@mail.ru', 'third_login', '1995-05-05'),
+    (4, 'Testov4', 'testov4@mail.ru', 'testov4', '1995-05-05'),
+    (5, 'Testov5', 'testov5@mail.ru', 'testov5', '1995-05-05');
 
 INSERT INTO films (id, name, description, release_date, duration, likes_count, mpa_rating_id)
 VALUES (1, 'Test Film', 'Test Description', '2020-01-01', 120, 1, 1),
@@ -40,8 +42,7 @@ VALUES (2, 1),
        (4, 1),
        (2, 2),
        (3, 2),
-       (2, 3),
-       (1, 3);
+       (2, 3);
 
 INSERT INTO film_genres (film_id, genre_id) VALUES (1, 1);
 
@@ -55,6 +56,6 @@ VALUES (1, 1),
        (3, 3),
        (4, 1);
 
-ALTER TABLE users ALTER COLUMN id RESTART WITH 4;
+ALTER TABLE users ALTER COLUMN id RESTART WITH 6;
 ALTER TABLE films ALTER COLUMN id RESTART WITH 5;
 ALTER TABLE directors ALTER COLUMN id RESTART WITH 4;
