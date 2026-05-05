@@ -32,37 +32,13 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        if (film.getRating().getId() != null && (film.getRating().getId() > 5 || film.getRating().getId() <= 0)) {
-            throw new NotFoundException("Рейтинга с id " + film.getRating().getId() + " не существует.");
-        }
-
-        if (film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException("Имя фильма не может быть пустым.");
-        }
-        if (film.getDuration() <= 0) {
-            throw new ValidationException("Продолжительность фильма не может быть отрицательной.");
-        }
-        if (film.getDescription() == null || film.getDescription().length() > 200) {
-            log.warn(
-                "Превышена длина описания {} при создании.",
-                film.getDescription().length()
-            );
-            throw new ValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
-            log.warn(
-                "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
-                film.getReleaseDate()
-            );
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-
+        validateFilm(film);
         return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
         filmStorage.getFilmById(film.getId());
-
+        validateFilm(film);
         return filmStorage.updateFilm(film);
     }
 
@@ -77,26 +53,55 @@ public class FilmService {
     public void userLikesFilm(Long id, Long userId) {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
-
         filmStorage.addLike(id, userId);
     }
 
     public void userDislikesFilm(Long id, Long userId) {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
-
         filmStorage.removeLike(id, userId);
     }
 
-    public List<Film> getTopFilmsByLikes(int count) {
-        return filmStorage.getTopFilms(count);
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        if (count <= 0) {
+            throw new ValidationException("Параметр count должен быть больше 0");
+        }
+
+        log.info("Получение популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
+
+        return filmStorage.getPopularFilms(count, genreId, year);
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
+        userStorage.getUserById(userId);
+        userStorage.getUserById(friendId);
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    public List<Film> getDirectorFilms(Long directorId, String sortBy) {
-        return filmStorage.getDirectorFilms(directorId, sortBy);
+
+    private void validateFilm(Film film) {
+        if (film.getName() == null || film.getName().isBlank()) {
+            throw new ValidationException("Имя фильма не может быть пустым.");
+        }
+
+        if (film.getDuration() <= 0) {
+            throw new ValidationException("Продолжительность фильма должна быть положительной.");
+        }
+
+        if (film.getDescription() == null || film.getDescription().length() > 200) {
+            log.warn("Некорректная длина описания: {}", film.getDescription());
+            throw new ValidationException("Максимальная длина описания — 200 символов");
+        }
+
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
+
+        if (film.getRating() != null && film.getRating().getId() != null) {
+            int ratingId = Math.toIntExact(film.getRating().getId());
+            if (ratingId <= 0 || ratingId > 5) {
+                throw new NotFoundException("Рейтинга с id " + ratingId + " не существует.");
+            }
+        }
     }
 }

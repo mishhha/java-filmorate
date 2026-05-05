@@ -1,20 +1,17 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.constraints.Positive;
+
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
 @Slf4j
-@Data
 @RestController
 @RequestMapping("/films")
 @RequiredArgsConstructor
@@ -54,33 +51,26 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void addLike(@PathVariable @PositiveOrZero Long id,
+                        @PathVariable @PositiveOrZero Long userId) {
         filmService.userLikesFilm(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void disLike(@PathVariable @PositiveOrZero Long id,
+                        @PathVariable @PositiveOrZero Long userId) {
         filmService.userDislikesFilm(id, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
-        return filmService.getTopFilmsByLikes(count);
-    }
-
-    @GetMapping("/common")
     @ResponseStatus(HttpStatus.OK)
-    public List<Film> getCommonFilms(@RequestParam @Positive Long userId, @RequestParam @Positive Long friendId) {
-        return filmService.getCommonFilms(userId, friendId);
-    }
-
-    @GetMapping("/director/{directorId}")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Film> getDirectorFilms(@PathVariable @Positive Long directorId, @RequestParam String sortBy) {
-        if (!List.of("likes", "year").contains(sortBy.toLowerCase())) {
-            throw new ValidationException("некорректный параметр сортировки. Доступны: likes, year");
-        }
-        return filmService.getDirectorFilms(directorId, sortBy);
+    public List<Film> getPopularFilms(
+            @RequestParam(defaultValue = "10") Integer count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year
+    ) {
+        log.info("GET /films/popular?count={}, genreId={}, year={}", count, genreId, year);
+        return filmService.getPopularFilms(count, genreId, year);
     }
 }
