@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model.film;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -23,11 +23,8 @@ public class Film {
 
     private Set<Genre> genres = new HashSet<>();
     private Set<Director> directors = new HashSet<>();
-
-    @JsonIgnore
     private Set<Long> likes = new HashSet<>();
 
-    public int getLikesCount() {
-        return likes.size();
-    }
+
+    private int likesCount;
 }

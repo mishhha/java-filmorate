@@ -313,8 +313,6 @@ public class FilmDbStorage implements FilmStorage {
                 jdbc.query(GET_DIRECTORS, directorRowMapper, film.getId())
         ));
 
-        film.setLikes(new HashSet<>(
-                jdbc.queryForList(GET_LIKES, Long.class, film.getId())
-        ));
+
     }
 }
