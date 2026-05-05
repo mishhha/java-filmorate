@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-
 import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.List;
-
 
 public interface FilmStorage {
 
@@ -12,7 +10,7 @@ public interface FilmStorage {
 
     List<Film> getFilms();
 
-    List<Film> getPopularFilms(int count, Long genreId, Integer year);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     Film getFilmById(Long id);
 

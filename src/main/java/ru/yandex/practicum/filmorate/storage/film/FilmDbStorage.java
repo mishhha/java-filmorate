@@ -187,7 +187,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilms() {
         List<Film> films = jdbc.query(FIND_ALL, filmRowMapper);
         for (Film film : films) {
-            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setGenres(new HashSet<>(getGenresByFilmId(film.getId())));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
         return films;
@@ -195,15 +195,63 @@ public class FilmDbStorage implements FilmStorage {
 
 
     @Override
-    public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
-        return jdbc.query(FIND_TOP_FILMS_QUERY, filmRowMapper, count);
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+
+        StringBuilder sql = new StringBuilder("""
+                    SELECT f.id,
+                           f.name,
+                           f.description,
+                           f.release_date,
+                           f.duration,
+                           f.likes_count,
+                           m.id AS rating_id,
+                           m.name AS rating_name
+                    FROM films AS f
+                    LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+                """);
+
+        List<Object> params = new ArrayList<>();
+
+
+        if (genreId != null) {
+            sql.append(" JOIN film_genres fg ON f.id = fg.film_id ");
+        }
+
+        sql.append(" WHERE 1=1 ");
+
+        if (genreId != null) {
+            sql.append(" AND fg.genre_id = ? ");
+            params.add(genreId);
+        }
+
+        if (year != null) {
+            sql.append(" AND EXTRACT(YEAR FROM f.release_date) = ? ");
+            params.add(year);
+        }
+
+        sql.append("""
+                    ORDER BY f.likes_count DESC
+                    LIMIT ?
+                """);
+
+        params.add(count);
+
+        List<Film> films = jdbc.query(sql.toString(), filmRowMapper, params.toArray());
+
+        for (Film film : films) {
+
+            film.setGenres(new HashSet<>(getGenresByFilmId(film.getId())));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+
+        return films;
     }
 
     @Override
     public Film getFilmById(Long id) {
         try {
             Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
-            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setGenres(new HashSet<>(getGenresByFilmId(film.getId())));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
             return film;
         } catch (EmptyResultDataAccessException e) {
@@ -355,7 +403,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Film> films = jdbc.query(FIND_COMMON_FILMS, filmRowMapper, userId, friendId);
         for (Film film : films) {
-            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setGenres(new HashSet<>(getGenresByFilmId(film.getId())));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
         return films;
@@ -402,7 +450,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Film> films = jdbc.query(findDirectorFilms, filmRowMapper, directorId);
         for (Film film : films) {
-            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setGenres(new HashSet<>(getGenresByFilmId(film.getId())));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
 
