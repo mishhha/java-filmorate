@@ -24,9 +24,10 @@ import java.util.*;
 
 @Slf4j
 @Primary
-@Repository
+@Repository("filmDbStorage")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
+
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
