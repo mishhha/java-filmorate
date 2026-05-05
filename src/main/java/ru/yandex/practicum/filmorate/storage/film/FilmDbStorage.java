@@ -22,11 +22,9 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.*;
 
-
 @Repository("filmDbStorage")
 @Primary
 @RequiredArgsConstructor
-
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbc;
@@ -38,7 +36,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String FIND_ALL = """
             SELECT f.id, f.name, f.description, f.release_date, f.duration,
-                   f.likes_count, f.mpa_rating_id,
+                   f.mpa_rating_id,
                    m.id AS rating_id, m.name AS rating_name
             FROM films f
             LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
@@ -70,11 +68,8 @@ public class FilmDbStorage implements FilmStorage {
     private static final String DELETE_LIKE =
             "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
 
-    private static final String INC_LIKES =
-            "UPDATE films SET likes_count = likes_count + 1 WHERE id = ?";
-
-    private static final String DEC_LIKES =
-            "UPDATE films SET likes_count = likes_count - 1 WHERE id = ?";
+    private static final String FIND_LIKES =
+            "SELECT user_id FROM likes WHERE film_id = ?";
 
     // ---------------- RELATIONS ----------------
 
@@ -91,9 +86,6 @@ public class FilmDbStorage implements FilmStorage {
             JOIN directors d ON fd.director_id = d.id
             WHERE fd.film_id = ?
             """;
-
-    private static final String FIND_LIKES =
-            "SELECT user_id FROM likes WHERE film_id = ?";
 
     // ---------------- CRUD ----------------
 
@@ -117,6 +109,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
+
         KeyHolder kh = new GeneratedKeyHolder();
 
         jdbc.update(con -> {
@@ -170,7 +163,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(DELETE_FILM, filmId);
     }
 
-    // ---------------- LIKES ----------------
+    // ---------------- LIKES (FIXED) ----------------
 
     @Override
     public void addLike(Long filmId, Long userId) {
@@ -184,20 +177,14 @@ public class FilmDbStorage implements FilmStorage {
         if (exists != null && exists > 0) return;
 
         jdbc.update(INSERT_LIKE, filmId, userId);
-        jdbc.update(INC_LIKES, filmId);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
-
-        int rows = jdbc.update(DELETE_LIKE, filmId, userId);
-
-        if (rows > 0) {
-            jdbc.update(DEC_LIKES, filmId);
-        }
+        jdbc.update(DELETE_LIKE, filmId, userId);
     }
 
-    // ---------------- POPULAR ----------------
+    // ---------------- POPULAR (FIXED) ----------------
 
     @Override
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
@@ -221,7 +208,15 @@ public class FilmDbStorage implements FilmStorage {
             params.add(year);
         }
 
-        sql.append(" ORDER BY f.likes_count DESC LIMIT ? ");
+        sql.append("""
+                ORDER BY (
+                    SELECT COUNT(*)
+                    FROM likes l
+                    WHERE l.film_id = f.id
+                ) DESC
+                LIMIT ?
+                """);
+
         params.add(count);
 
         List<Film> films = jdbc.query(sql.toString(), filmRowMapper, params.toArray());
@@ -229,13 +224,15 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
-    // ---------------- DIRECTOR FILMS ----------------
+    // ---------------- DIRECTORS (FIXED) ----------------
 
     @Override
     public List<Film> getDirectorFilms(Long directorId, String sortBy) {
 
         String order = switch (sortBy) {
-            case "likes" -> "f.likes_count DESC";
+            case "likes" -> """
+                    (SELECT COUNT(*) FROM likes l WHERE l.film_id = f.id) DESC
+                    """;
             case "year" -> "f.release_date ASC";
             default -> throw new ValidationException("Unknown sort type");
         };
@@ -244,11 +241,8 @@ public class FilmDbStorage implements FilmStorage {
                 SELECT f.*, m.id AS rating_id, m.name AS rating_name
                 FROM films f
                 LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
-                WHERE f.id IN (
-                    SELECT fd.film_id
-                    FROM films_directors fd
-                    WHERE fd.director_id = ?
-                )
+                JOIN films_directors fd ON f.id = fd.film_id
+                WHERE fd.director_id = ?
                 ORDER BY %s
                 """.formatted(order);
 
@@ -286,7 +280,6 @@ public class FilmDbStorage implements FilmStorage {
                 WHERE l1.user_id = ?
                   AND l2.user_id = ?
                 GROUP BY f.id
-                ORDER BY f.likes_count DESC
                 """;
 
         List<Film> films = jdbc.query(sql, filmRowMapper, userId, friendId);
