@@ -67,45 +67,38 @@ public class UserService {
         return userStorage.getCommonFriends(id, otherId);
     }
 
+
     public List<Film> getRecommendations(Long userId) {
+
         User currentUser = userStorage.getUserById(userId);
-        Set<Long> currentUserLikes = currentUser.getLikesFilms();
+
+        Set<Long> currentLikes = currentUser.getLikesFilms();
 
         User similarUser = null;
-        long maxTotalLikes = 0;
+        long maxCommon = 0;
 
+        for (User other : userStorage.getUsers()) {
 
-        for (User otherUser : userStorage.getUsers()) {
+            if (other.getId().equals(currentUser.getId())) continue;
 
-            if (otherUser.getId().equals(currentUser.getId())) {
-                continue;
-            }
+            Set<Long> otherLikes = other.getLikesFilms();
 
-
-            Set<Long> otherUserLikes = otherUser.getLikesFilms();
-
-            long totalLikes = currentUserLikes.stream()
-                    .filter(otherUserLikes::contains)
+            long common = currentLikes.stream()
+                    .filter(otherLikes::contains)
                     .count();
 
-            if (totalLikes > maxTotalLikes) {
-                maxTotalLikes = totalLikes;
-                similarUser = otherUser;
+            if (common > maxCommon) {
+                maxCommon = common;
+                similarUser = other;
             }
-
         }
-
 
         if (similarUser == null) {
             return List.of();
         }
 
-
-        List<Long> filmIds = similarUser.getLikesFilms().stream()
-                .filter(filmId -> !currentUserLikes.contains(filmId))
-                .toList();
-
-        return filmIds.stream()
+        return similarUser.getLikesFilms().stream()
+                .filter(id -> !currentLikes.contains(id))
                 .map(filmStorage::getFilmById)
                 .toList();
     }
