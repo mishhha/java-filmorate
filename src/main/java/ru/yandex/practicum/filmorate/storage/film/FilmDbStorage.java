@@ -172,7 +172,9 @@ public class FilmDbStorage implements FilmStorage {
 
     // ---------------- LIKES FIXED ----------------
 
+
     @Override
+
     public void addLike(Long filmId, Long userId) {
 
         Integer exists = jdbc.queryForObject(
@@ -181,9 +183,7 @@ public class FilmDbStorage implements FilmStorage {
                 filmId, userId
         );
 
-        if (exists != null && exists > 0) {
-            return;
-        }
+        if (exists != null && exists > 0) return;
 
         jdbc.update(INSERT_LIKE, filmId, userId);
         jdbc.update(INC_LIKES, filmId);
@@ -191,6 +191,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeLike(Long filmId, Long userId) {
+
         int rows = jdbc.update(DELETE_LIKE, filmId, userId);
 
         if (rows > 0) {
@@ -198,9 +199,12 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+
     // ---------------- POPULAR ----------------
 
+
     @Override
+
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
 
         StringBuilder sql = new StringBuilder(FIND_ALL_FILMS);
@@ -233,6 +237,7 @@ public class FilmDbStorage implements FilmStorage {
     // ---------------- DIRECTORS FIXED ----------------
 
     @Override
+
     public List<Film> getDirectorFilms(Long directorId, String sortBy) {
 
         String order = switch (sortBy) {
