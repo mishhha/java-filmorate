@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,10 +22,11 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.*;
 
-@Slf4j
+
+@Repository("filmDbStorage")
 @Primary
-@Repository
 @RequiredArgsConstructor
+
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbc;
