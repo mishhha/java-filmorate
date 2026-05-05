@@ -107,6 +107,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+
     @Override
     public Film addFilm(Film film) {
 
@@ -127,8 +128,26 @@ public class FilmDbStorage implements FilmStorage {
             return ps;
         }, kh);
 
-        film.setId(Objects.requireNonNull(kh.getKey()).longValue());
-        return getFilmById(film.getId());
+        Long filmId = Objects.requireNonNull(kh.getKey()).longValue();
+        film.setId(filmId);
+
+        // 🔥 ДОБАВЬ ЭТО
+
+        for (Genre g : film.getGenres()) {
+            jdbc.update(
+                    "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)",
+                    filmId, g.getId()
+            );
+        }
+
+        for (Director d : film.getDirectors()) {
+            jdbc.update(
+                    "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)",
+                    filmId, d.getId()
+            );
+        }
+
+        return getFilmById(filmId);
     }
 
     @Override
