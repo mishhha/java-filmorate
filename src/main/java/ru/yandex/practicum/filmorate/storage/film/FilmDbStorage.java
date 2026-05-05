@@ -184,13 +184,17 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Long filmId, Long userId) {
+
+
         jdbc.update(INSERT_LIKE, filmId, userId);
         jdbc.update(INC_LIKES, filmId);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
+
         int rows = jdbc.update(DELETE_LIKE, filmId, userId);
+
         if (rows > 0) {
             jdbc.update(DEC_LIKES, filmId);
         }

@@ -28,12 +28,13 @@ public class FilmRowMapper implements RowMapper<Film> {
 
         film.setDuration(rs.getInt("duration"));
 
-        long ratingId = rs.getLong("rating_id");
+
+        long ratingId = rs.getLong("mpa_rating_id");
 
         if (!rs.wasNull()) {
             RatingMpa rating = new RatingMpa();
             rating.setId(ratingId);
-            rating.setName(rs.getString("rating_name"));
+
             film.setRating(rating);
         }
 
