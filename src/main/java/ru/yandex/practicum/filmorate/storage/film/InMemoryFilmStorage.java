@@ -9,12 +9,7 @@ import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,15 +61,27 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
+
     @Override
     public Film addFilm(Film film) {
+
+        if (film.getGenres() != null) {
+            film.setGenres(new HashSet<>(film.getGenres()));
+        }
+
         films.put(film.getId(), film);
         log.info("Фильм {} создан.", film.getName());
         return film;
     }
 
+
     @Override
     public Film updateFilm(Film film) {
+
+        if (film.getGenres() != null) {
+            film.setGenres(new HashSet<>(film.getGenres()));
+        }
+
         films.put(film.getId(), film);
         log.info("Фильм {} обновлен.", film.getName());
         return film;
