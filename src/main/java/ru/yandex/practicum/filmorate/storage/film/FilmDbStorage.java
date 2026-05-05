@@ -238,6 +238,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+
     @Override
     public List<Film> getDirectorFilms(Long directorId, String sortBy) {
 
@@ -248,8 +249,9 @@ public class FilmDbStorage implements FilmStorage {
         };
 
         String sql = """
-                SELECT f.*
+                SELECT f.*, m.id AS rating_id, m.name AS rating_name
                 FROM films f
+                LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
                 WHERE f.id IN (
                     SELECT film_id
                     FROM films_directors
