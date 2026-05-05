@@ -8,32 +8,30 @@ import ru.yandex.practicum.filmorate.model.film.RatingMpa;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashSet;
+
 
 @Component
 public class FilmRowMapper implements RowMapper<Film> {
 
-
     @Override
-    public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+    public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
 
         Film film = new Film();
 
-        film.setId(resultSet.getLong("id"));
-        film.setName(resultSet.getString("name"));
-        film.setDescription(resultSet.getString("description"));
-        film.setReleaseDate(resultSet.getObject("release_date", LocalDate.class));
-        film.setDuration(resultSet.getInt("duration"));
+        film.setId(rs.getLong("id"));
+        film.setName(rs.getString("name"));
+        film.setDescription(rs.getString("description"));
+        film.setReleaseDate(rs.getObject("release_date", LocalDate.class));
+        film.setDuration(rs.getInt("duration"));
 
+        film.setLikesCount(rs.getInt("likes_count"));
 
-        film.setLikes(new HashSet<>());
+        Long ratingId = rs.getLong("rating_id");
 
-        Long ratingId = resultSet.getLong("rating_id");
-
-        if (!resultSet.wasNull()) {
+        if (!rs.wasNull()) {
             RatingMpa rating = new RatingMpa();
             rating.setId(ratingId);
-            rating.setName(resultSet.getString("rating_name"));
+            rating.setName(rs.getString("rating_name"));
             film.setRating(rating);
         }
 

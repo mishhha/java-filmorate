@@ -382,6 +382,7 @@ public class FilmDbStorage implements FilmStorage {
         return new HashSet<>(directors);
     }
 
+
     @Override
     public void addLike(Long filmId, Long userId) {
         jdbc.update(INSERT_ADD_LIKE, filmId, userId);
@@ -393,6 +394,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(DELETE_LIKE_FILM, filmId, userId);
         jdbc.update(UPDATE_DISLIKES_FILM, filmId);
     }
+
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {

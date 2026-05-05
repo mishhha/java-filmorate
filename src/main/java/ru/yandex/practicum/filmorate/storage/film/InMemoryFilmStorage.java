@@ -87,20 +87,22 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+
     @Override
     public void addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         userService.getUsersById(userId);
 
-        film.addLike(userId);
+        film.setLikesCount(film.getLikesCount() + 1);
     }
+
 
     @Override
     public void removeLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         userService.getUsersById(userId);
 
-        film.removeLike(userId);
+        film.setLikesCount(Math.max(0, film.getLikesCount() - 1));
     }
 
     public long nextIdGenerate() {
@@ -121,7 +123,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .filter(friendFilms::contains)
                 .map(films::get)
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
                 .collect(Collectors.toList());
     }
 
@@ -134,7 +136,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         switch (sortBy.toLowerCase()) {
             case "likes":
-                comparator = Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed();
+                comparator = Comparator.comparingInt(Film::getLikesCount).reversed();
+                ;
                 break;
 
             case "year":
