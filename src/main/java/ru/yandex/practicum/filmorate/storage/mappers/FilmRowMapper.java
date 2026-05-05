@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.film.RatingMpa;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashSet;
 
 
 @Component
@@ -24,12 +25,17 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setReleaseDate(rs.getObject("release_date", LocalDate.class));
         film.setDuration(rs.getInt("duration"));
 
-        Long ratingId = rs.getObject("rating_id", Long.class);
+        film.setLikes(new HashSet<>());
+        film.setGenres(new HashSet<>());
+        film.setDirectors(new HashSet<>());
 
-        if (ratingId != null) {
+        Long ratingId = rs.getObject("rating_id", Long.class);
+        String ratingName = rs.getString("rating_name");
+
+        if (ratingId != null && ratingName != null) {
             RatingMpa rating = new RatingMpa();
             rating.setId(ratingId);
-            rating.setName(rs.getString("rating_name"));
+            rating.setName(ratingName);
             film.setRating(rating);
         }
 
