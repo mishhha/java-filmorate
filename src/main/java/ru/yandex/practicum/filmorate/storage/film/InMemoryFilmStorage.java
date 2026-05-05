@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.film.Director;
+
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.UserService;
-
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,10 +20,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final UserService userService;
     private final DirectorService directorService;
 
-    public InMemoryFilmStorage(UserService userService, DirectorService directorService) {
+    public InMemoryFilmStorage(UserService userService,
+                               DirectorService directorService) {
         this.userService = userService;
         this.directorService = directorService;
     }
+
 
     @Override
     public void deleteFilmById(Long filmId) {
@@ -47,6 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
+
         if (film.getId() == null) {
             film.setId(nextIdGenerate());
         }
@@ -59,34 +61,56 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setGenres(new HashSet<>(film.getGenres()));
         }
 
+        if (film.getDirectors() == null) {
+            film.setDirectors(new HashSet<>());
+        }
+
         films.put(film.getId(), film);
-        log.info("Фильм {} создан.", film.getName());
+
+        log.info("Фильм {} добавлен", film.getName());
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
+
         if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Фильм не найден");
         }
 
-        if (film.getLikes() == null) {
-            film.setLikes(new HashSet<>());
-        }
+        Film existing = films.get(film.getId());
+
+        existing.setName(film.getName());
+        existing.setDescription(film.getDescription());
+        existing.setReleaseDate(film.getReleaseDate());
+        existing.setDuration(film.getDuration());
+        existing.setRating(film.getRating());
 
         if (film.getGenres() != null) {
-            film.setGenres(new HashSet<>(film.getGenres()));
+            existing.setGenres(new HashSet<>(film.getGenres()));
         }
 
-        films.put(film.getId(), film);
-        log.info("Фильм {} обновлён.", film.getName());
-        return film;
+        if (film.getDirectors() != null) {
+            existing.setDirectors(new HashSet<>(film.getDirectors()));
+        }
+
+        // ВАЖНО: лайки НЕ затираем
+        if (existing.getLikes() == null) {
+            existing.setLikes(new HashSet<>());
+        }
+
+        return existing;
     }
+
 
     @Override
     public void addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         userService.getUsersById(userId);
+
+        if (film.getLikes() == null) {
+            film.setLikes(new HashSet<>());
+        }
 
         film.getLikes().add(userId);
     }
@@ -96,7 +120,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = getFilmById(filmId);
         userService.getUsersById(userId);
 
-        film.getLikes().remove(userId);
+        if (film.getLikes() != null) {
+            film.getLikes().remove(userId);
+        }
     }
 
 
@@ -121,13 +147,17 @@ public class InMemoryFilmStorage implements FilmStorage {
 
                     return film.getReleaseDate().getYear() == year;
                 })
-                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
+                .sorted(Comparator.comparingInt((Film f) ->
+                        f.getLikes() == null ? 0 : f.getLikes().size()
+                ).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
+
         Set<Long> userLikes = userService.getUsersById(userId).getLikesFilms();
         Set<Long> friendLikes = userService.getUsersById(friendId).getLikesFilms();
 
@@ -135,36 +165,39 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .filter(friendLikes::contains)
                 .map(films::get)
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
+                .sorted(Comparator.comparingInt((Film f) ->
+                        f.getLikes() == null ? 0 : f.getLikes().size()
+                ).reversed())
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public List<Film> getDirectorFilms(Long directorId, String sortBy) {
 
-        Director director = directorService.getDirectorById(directorId);
+        directorService.getDirectorById(directorId);
 
-        Comparator<Film> comparator;
+        Comparator<Film> comparator = switch (sortBy.toLowerCase()) {
+            case "likes" -> Comparator.comparingInt((Film f) ->
+                    f.getLikes() == null ? 0 : f.getLikes().size()
+            ).reversed();
 
-        switch (sortBy.toLowerCase()) {
-            case "likes":
-                comparator = Comparator.comparingInt(Film::getLikesCount).reversed();
-                break;
+            case "year" -> Comparator.comparing(
+                    Film::getReleaseDate,
+                    Comparator.nullsLast(Comparator.naturalOrder())
+            );
 
-            case "year":
-                comparator = Comparator.comparing(Film::getReleaseDate,
-                        Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            default:
-                throw new ValidationException("Тип сортировки не распознан");
-        }
+            default -> throw new ValidationException("Unknown sort type");
+        };
 
         return films.values().stream()
-                .filter(film -> film.getDirectors() != null && film.getDirectors().contains(director))
+                .filter(film -> film.getDirectors() != null &&
+                        film.getDirectors().stream()
+                                .anyMatch(d -> d.getId().equals(directorId)))
                 .sorted(comparator)
                 .collect(Collectors.toList());
     }
+
 
     private long nextIdGenerate() {
         return films.keySet().stream()
