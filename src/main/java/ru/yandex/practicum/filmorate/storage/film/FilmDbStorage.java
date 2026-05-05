@@ -122,7 +122,13 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilms() {
-        return jdbc.query(FIND_ALL_FILMS, filmRowMapper);
+        List<Film> films = jdbc.query(FIND_ALL_FILMS, filmRowMapper);
+
+        for (Film film : films) {
+            fillRelations(film);
+        }
+
+        return films;
     }
 
     @Override
