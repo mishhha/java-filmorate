@@ -76,6 +76,13 @@ public class FilmDbStorage implements FilmStorage {
             LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
             WHERE f.id = ?
             """;
+    private static final String FIND_ALL_FILMS = """
+            SELECT f.id, f.name, f.description, f.release_date, f.duration,
+                   f.likes_count, f.mpa_rating_id,
+                   m.id AS rating_id, m.name AS rating_name
+            FROM films f
+            LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
+            """;
 
     private static final String FIND_GENRES = """
             SELECT g.id, g.name
@@ -112,9 +119,10 @@ public class FilmDbStorage implements FilmStorage {
         jdbc.update(DELETE_FILM, filmId);
     }
 
+
     @Override
     public List<Film> getFilms() {
-        return jdbc.query("SELECT * FROM films", filmRowMapper);
+        return jdbc.query(FIND_ALL_FILMS, filmRowMapper);
     }
 
     @Override
@@ -184,8 +192,11 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
 
         StringBuilder sql = new StringBuilder("""
-                SELECT f.*
+                SELECT DISTINCT f.id, f.name, f.description, f.release_date, f.duration,
+                       f.likes_count, f.mpa_rating_id,
+                       m.id AS rating_id, m.name AS rating_name
                 FROM films f
+                LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
                 """);
 
         List<Object> params = new ArrayList<>();
