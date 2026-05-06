@@ -28,7 +28,7 @@ public class FilmController {
         @RequestParam (required = false) String query,
         @RequestParam (required = false) String by
     ) {
-        if(query == null || query.isBlank()) {
+        if (query == null || query.isBlank()) {
             return filmService.searchTopFilms();
         }
         return filmService.searchFilmBySubstring(query, by);
