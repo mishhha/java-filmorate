@@ -218,12 +218,22 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> findFilmsByPopular() {
-        return jdbc.query(SEARCH_TOP_FILMS_QUERY, filmRowMapper);
+        List<Film> films = jdbc.query(SEARCH_TOP_FILMS_QUERY, filmRowMapper);
+        for(Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+        return films;
     }
 
     @Override
     public List<Film> searchFilmBySubstring(String query) {
-        return jdbc.query(FIND_FILM_BY_SUBSTRING, filmRowMapper, "%" + query + "%");
+        List<Film> films = jdbc.query(FIND_FILM_BY_SUBSTRING, filmRowMapper, "%" + query + "%");
+        for(Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+        return films;
     }
 
     @Override
@@ -232,16 +242,22 @@ public class FilmDbStorage implements FilmStorage {
             return List.of();
         }
         List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING, filmRowMapper, "%" + director + "%");
-
+        for(Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
         return films;
     }
 
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query) {
         String q = " OR f.name ILIKE ?";
-        List<Film> searchFilms = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING + q, filmRowMapper, "%" + query + "%", "%" + query + "%");
-
-        return searchFilms;
+        List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING + q, filmRowMapper, "%" + query + "%", "%" + query + "%");
+        for(Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+        return films;
     }
 
     @Override
