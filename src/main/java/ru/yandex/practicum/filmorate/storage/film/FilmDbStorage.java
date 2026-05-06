@@ -269,15 +269,15 @@ public class FilmDbStorage implements FilmStorage {
         if (genreId == null) {
             String sql = """
                 SELECT f.id,
-                      f.name,
-                      f.description,
-                      f.release_date,
-                      f.duration,
-                      f.likes_count,
-                      f.mpa_rating_id,
-                      fg.genre_id,
-                      m.id AS rating_id,
-                      m.name AS rating_name
+                       f.name,
+                       f.description,
+                       f.release_date,
+                       f.duration,
+                       f.likes_count,
+                       f.mpa_rating_id,
+                       fg.genre_id,
+                       m.id AS rating_id,
+                       m.name AS rating_name
                 FROM films f
                 JOIN film_genres AS fg ON f.id = fg.film_id
                 LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id

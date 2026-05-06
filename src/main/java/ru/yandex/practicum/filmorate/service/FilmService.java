@@ -31,9 +31,11 @@ public class FilmService {
     }
 
     public List<Film> searchTopFilmsByGenreAndYear(Long count, Long genre, Long year) {
-        LocalDate ld = LocalDate.of(year.intValue(),1, 1);
-        if (ld.isBefore(MIN_DATE_RELEASE)) {
-            return List.of();
+        if (year != null) {
+            LocalDate firstDay = LocalDate.of(year.intValue(), 1, 1);
+            if (firstDay.isBefore(MIN_DATE_RELEASE)) {
+                return List.of();
+            }
         }
         return filmStorage.findTopFilmsByGenresAndYear(count, genre, year);
     }
