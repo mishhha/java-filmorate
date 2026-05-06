@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
@@ -84,8 +85,8 @@ public class FilmDbStorage implements FilmStorage {
             fillRelations(film);
             return film;
         } catch (EmptyResultDataAccessException e) {
-            //throw new NotFoundException("Фильм не найден");
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
+            //throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
     }
 
@@ -165,10 +166,15 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
 
+        Film oldFilm = getFilmById(film.getId());
+
+        Set<Director> directorsToSave =
+                film.getDirectors() != null ? film.getDirectors() : oldFilm.getDirectors();
+
         jdbc.update("DELETE FROM films_directors WHERE film_id = ?", film.getId());
 
-        if (film.getDirectors() != null) {
-            for (Director d : film.getDirectors()) {
+        if (directorsToSave != null && !directorsToSave.isEmpty()) {
+            for (Director d : directorsToSave) {
                 jdbc.update(
                         "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)",
                         film.getId(),
@@ -176,6 +182,8 @@ public class FilmDbStorage implements FilmStorage {
                 );
             }
         }
+
+
 
         return getFilmById(film.getId());
     }
@@ -270,7 +278,7 @@ public class FilmDbStorage implements FilmStorage {
     private void fillRelations(Film film) {
         film.setGenres(loadGenres(film.getId()));
         film.setLikes(loadLikes(film.getId()));
-        //film.setDirectors(loadDirectors(film.getId()));
+        film.setDirectors(loadDirectors(film.getId()));
 
 
     }
