@@ -22,6 +22,18 @@ public class FilmController {
 
     private final FilmService filmService;
 
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> searchFilms(
+        @RequestParam (required = false) String query,
+        @RequestParam (required = false) String by
+    ) {
+        if (query == null || query.isBlank()) {
+            return filmService.searchTopFilms();
+        }
+        return filmService.searchFilmBySubstring(query, by);
+    }
+
     @DeleteMapping("/{filmId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteFilmById(@PathVariable @PositiveOrZero Long filmId) {
