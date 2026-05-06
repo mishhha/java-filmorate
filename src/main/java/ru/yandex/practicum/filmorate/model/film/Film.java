@@ -22,7 +22,7 @@ public class Film {
     @JsonProperty("mpa")
     private RatingMpa rating;
 
-    private Set<Genre> genres = new HashSet<>();
+    private Set<Genre> genres;
     private Set<Director> directors = new HashSet<>();
     @Getter(AccessLevel.NONE)
     private Set<Long> likes = new HashSet<>();
