@@ -187,25 +187,23 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
 
         String sql = """
-                    SELECT f.id,
-                           f.name,
-                           f.description,
-                           f.release_date,
-                           f.duration,
-                           m.id AS rating_id,
-                           m.name AS rating_name
-                    FROM films f
-                    LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
-                    LEFT JOIN likes l ON f.id = l.film_id
-                    WHERE (? IS NULL OR EXISTS (
-                        SELECT 1 FROM film_genres fg
-                        WHERE fg.film_id = f.id AND fg.genre_id = ?
-                    ))
-                    AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
-                    GROUP BY f.id, m.id, m.name
-                    ORDER BY COUNT(l.user_id) DESC
-                    LIMIT ?
-                """;
+    SELECT f.id,
+           f.name,
+           f.description,
+           f.release_date,
+           f.duration,
+           m.id AS rating_id,
+           m.name AS rating_name
+    FROM films f
+    LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
+    LEFT JOIN film_genres fg ON f.id = fg.film_id
+    LEFT JOIN likes l ON f.id = l.film_id
+    WHERE (? IS NULL OR fg.genre_id = ?)
+      AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
+    GROUP BY f.id, m.id, m.name
+    ORDER BY COUNT(DISTINCT l.user_id) DESC
+    LIMIT ?
+""";
 
         List<Film> films = jdbc.query(sql, filmRowMapper,
                 genreId, genreId,
