@@ -202,7 +202,7 @@ public class FilmDbStorage implements FilmStorage {
                m.name AS rating_name
         FROM films AS f
         LEFT JOIN films_directors AS fd ON f.id = fd.film_id
-        JOIN directors AS d ON fd.director_id = d.id
+        LEFT JOIN directors AS d ON fd.director_id = d.id
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE d.name ILIKE ?
         """;
