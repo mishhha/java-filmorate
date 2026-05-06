@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.model.film;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = "id")
 public class Film {
 
     private Long id;
@@ -22,10 +24,21 @@ public class Film {
 
     private Set<Genre> genres = new HashSet<>();
     private Set<Director> directors = new HashSet<>();
-
+    @Getter(AccessLevel.NONE)
     private Set<Long> likes = new HashSet<>();
 
+    public int getLikes() {
+        return likes.size();
+    }
+
+
+    @JsonProperty("likesCount")
     public int getLikesCount() {
         return likes.size();
+    }
+
+
+    public Set<Long> getLikesSet() {
+        return likes;
     }
 }

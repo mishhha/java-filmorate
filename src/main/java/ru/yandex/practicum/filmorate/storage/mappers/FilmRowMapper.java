@@ -8,12 +8,10 @@ import ru.yandex.practicum.filmorate.model.film.RatingMpa;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashSet;
 
 
 @Component
 public class FilmRowMapper implements RowMapper<Film> {
-
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
 
@@ -25,17 +23,11 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setReleaseDate(rs.getObject("release_date", LocalDate.class));
         film.setDuration(rs.getInt("duration"));
 
-
-        film.setGenres(new HashSet<>());
-        film.setDirectors(new HashSet<>());
-
         Long ratingId = rs.getObject("rating_id", Long.class);
-        String ratingName = rs.getString("rating_name");
-
-        if (ratingId != null && ratingName != null) {
+        if (ratingId != null) {
             RatingMpa rating = new RatingMpa();
             rating.setId(ratingId);
-            rating.setName(ratingName);
+            rating.setName(rs.getString("rating_name")); // можно сразу заполнить
             film.setRating(rating);
         }
 

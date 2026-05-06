@@ -5,11 +5,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+
 import java.util.List;
 
 @Service
@@ -35,6 +37,7 @@ public class FilmService {
         validateFilm(film);
         return filmStorage.addFilm(film);
     }
+
 
     public Film updateFilm(Film film) {
         filmStorage.getFilmById(film.getId());
@@ -69,7 +72,17 @@ public class FilmService {
 
         log.info("Получение популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
 
-        return filmStorage.getPopularFilms(count, genreId, year);
+        return filmStorage.getFilms().stream()
+                .filter(film -> genreId == null ||
+                        film.getGenres().stream().anyMatch(g -> g.getId().equals(genreId)))
+                .filter(film -> year == null ||
+                        film.getReleaseDate().getYear() == year)
+                .sorted((f1, f2) -> Integer.compare(
+                        f2.getLikesSet().size(),
+                        f1.getLikesSet().size()
+                ))
+                .limit(count)
+                .toList();
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {

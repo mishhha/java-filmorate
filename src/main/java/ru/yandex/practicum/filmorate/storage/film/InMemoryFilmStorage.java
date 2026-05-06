@@ -53,9 +53,6 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setId(nextIdGenerate());
         }
 
-        if (film.getLikes() == null) {
-            film.setLikes(new HashSet<>());
-        }
 
         if (film.getGenres() != null) {
             film.setGenres(new HashSet<>(film.getGenres()));
@@ -94,11 +91,6 @@ public class InMemoryFilmStorage implements FilmStorage {
             existing.setDirectors(new HashSet<>(film.getDirectors()));
         }
 
-        // ВАЖНО: лайки НЕ затираем
-        if (existing.getLikes() == null) {
-            existing.setLikes(new HashSet<>());
-        }
-
         return existing;
     }
 
@@ -108,11 +100,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = getFilmById(filmId);
         userService.getUsersById(userId);
 
-        if (film.getLikes() == null) {
-            film.setLikes(new HashSet<>());
-        }
+        film.getLikesSet().add(userId);
 
-        film.getLikes().add(userId);
     }
 
     @Override
@@ -120,9 +109,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = getFilmById(filmId);
         userService.getUsersById(userId);
 
-        if (film.getLikes() != null) {
-            film.getLikes().remove(userId);
-        }
+        film.getLikesSet().remove(userId);
+
     }
 
 
@@ -147,9 +135,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
                     return film.getReleaseDate().getYear() == year;
                 })
-                .sorted(Comparator.comparingInt((Film f) ->
-                        f.getLikes() == null ? 0 : f.getLikes().size()
-                ).reversed())
+                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
+
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -158,29 +145,36 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
 
-        Set<Long> userLikes = userService.getUsersById(userId).getLikesFilms();
-        Set<Long> friendLikes = userService.getUsersById(friendId).getLikesFilms();
+        Set<Long> userLikes = films.values().stream()
+                .filter(f -> f.getLikesSet().contains(userId))
+                .map(Film::getId)
+                .collect(Collectors.toSet());
+
+        Set<Long> friendLikes = films.values().stream()
+                .filter(f -> f.getLikesSet().contains(friendId))
+                .map(Film::getId)
+                .collect(Collectors.toSet());
 
         return userLikes.stream()
                 .filter(friendLikes::contains)
                 .map(films::get)
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt((Film f) ->
-                        f.getLikes() == null ? 0 : f.getLikes().size()
-                ).reversed())
+                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
+
                 .collect(Collectors.toList());
     }
 
 
     @Override
+
+
     public List<Film> getDirectorFilms(Long directorId, String sortBy) {
 
         directorService.getDirectorById(directorId);
 
         Comparator<Film> comparator = switch (sortBy.toLowerCase()) {
-            case "likes" -> Comparator.comparingInt((Film f) ->
-                    f.getLikes() == null ? 0 : f.getLikes().size()
-            ).reversed();
+
+            case "likes" -> Comparator.comparingInt(Film::getLikes).reversed();
 
             case "year" -> Comparator.comparing(
                     Film::getReleaseDate,

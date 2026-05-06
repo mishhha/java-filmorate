@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,11 +67,11 @@ public class FilmController {
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getPopularFilms(
-            @RequestParam(defaultValue = "10") Integer count,
+            @RequestParam(defaultValue = "10") @Positive Integer count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year
     ) {
-        log.info("GET /films/popular?count={}, genreId={}, year={}", count, genreId, year);
+        log.info("Get popular films: count={}, genreId={}, year={}", count, genreId, year);
         return filmService.getPopularFilms(count, genreId, year);
     }
 }

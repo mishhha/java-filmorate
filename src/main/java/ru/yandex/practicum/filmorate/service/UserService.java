@@ -9,8 +9,11 @@ import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.Comparator;
 import java.util.List;
+
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -67,37 +70,37 @@ public class UserService {
         return userStorage.getCommonFriends(id, otherId);
     }
 
-
     public List<Film> getRecommendations(Long userId) {
 
-        User currentUser = userStorage.getUserById(userId);
+        User user = userStorage.getUserById(userId);
 
-        Set<Long> currentLikes = currentUser.getLikesFilms();
+        Set<Long> currentLikes = filmStorage.getFilms().stream()
+                .filter(f -> f.getLikesSet().contains(userId))
+                .map(Film::getId)
+                .collect(Collectors.toSet());
 
-        User similarUser = null;
-        long maxCommon = 0;
+        Long similarUserId = userStorage.getUsers().stream()
+                .filter(u -> !u.getId().equals(userId))
+                .max(Comparator.comparingLong(other ->
+                        filmStorage.getFilms().stream()
+                                .filter(f -> f.getLikesSet().contains(other.getId()))
+                                .map(Film::getId)
+                                .filter(currentLikes::contains)
+                                .count()
+                ))
+                .map(User::getId)
+                .orElse(null);
 
-        for (User other : userStorage.getUsers()) {
-
-            if (other.getId().equals(currentUser.getId())) continue;
-
-            Set<Long> otherLikes = other.getLikesFilms();
-
-            long common = currentLikes.stream()
-                    .filter(otherLikes::contains)
-                    .count();
-
-            if (common > maxCommon) {
-                maxCommon = common;
-                similarUser = other;
-            }
-        }
-
-        if (similarUser == null) {
+        if (similarUserId == null) {
             return List.of();
         }
 
-        return similarUser.getLikesFilms().stream()
+        Set<Long> similarLikes = filmStorage.getFilms().stream()
+                .filter(f -> f.getLikesSet().contains(similarUserId))
+                .map(Film::getId)
+                .collect(Collectors.toSet());
+
+        return similarLikes.stream()
                 .filter(id -> !currentLikes.contains(id))
                 .map(filmStorage::getFilmById)
                 .toList();

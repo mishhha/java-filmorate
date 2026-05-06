@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.model.user.FriendShipStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 @Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
-    private final HashMap<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public void deleteUserById(Long userId) {
@@ -21,16 +22,39 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
+        if (user.getId() == null) {
+            user.setId(nextIdGenerate());
+        }
+
+        if (user.getFriendShips() == null) {
+            user.setFriendShips(new HashMap<>());
+        }
+
         users.put(user.getId(), user);
-        log.info("Пользователь с именем {} и логином {} зарегистрирован.", user.getName(), user.getLogin());
+
+        log.info("Пользователь {} зарегистрирован", user.getLogin());
         return user;
     }
 
     @Override
     public User updateUser(User user) {
-        users.put(user.getId(), user);
-        log.info("Пользователь с именем {} и логином {} обновил свой профиль.", user.getName(), user.getLogin());
-        return user;
+
+        if (!users.containsKey(user.getId())) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        User existing = users.get(user.getId());
+
+        existing.setEmail(user.getEmail());
+        existing.setLogin(user.getLogin());
+        existing.setName(user.getName());
+        existing.setBirthday(user.getBirthday());
+
+        if (user.getFriendShips() != null) {
+            existing.setFriendShips(user.getFriendShips());
+        }
+
+        return existing;
     }
 
     @Override
@@ -39,75 +63,70 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+
     public User getUserById(Long id) {
         User user = users.get(id);
+
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
+
         return user;
     }
 
     @Override
     public List<User> getFriends(Long id) {
-        User user = users.get(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
-        Set<Long> getFriendId = user.getFriendList();
 
-        return getFriendId.stream()
-            .map(users::get)
-            .filter(Objects::nonNull)
-            .toList();
+        User user = getUserById(id);
+
+        return user.getFriendShips().keySet().stream()
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Override
     public void deleteFriend(Long idUser, Long idFriend) {
-        User user = users.get(idUser);
-        if (user == null) {
-            throw new NotFoundException("Пользователь c ID: " + idUser + " не найден.");
-        }
-        user.deleteFromFriends(idFriend);
 
-        User userFriend = users.get(idFriend);
-        if (userFriend == null) {
-            throw new NotFoundException("Пользователь c ID: " + idFriend + " не найден.");
-        }
-        userFriend.deleteFromFriends(idUser);
-        users.get(idFriend);
+        User user = getUserById(idUser);
+        User friend = getUserById(idFriend);
+
+        user.getFriendShips().remove(idFriend);
+        friend.getFriendShips().remove(idUser);
     }
 
     @Override
     public User addFriend(Long idUser, Long idFriend) {
-        User user = users.get(idUser);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
-        user.addFriend(idFriend);
-        User userFriend = users.get(idFriend);
-        if (userFriend == null) {
-            throw new NotFoundException("Пользователь друг не найден.");
-        }
-        userFriend.addFriend(idUser);
-        return userFriend;
+
+        User user = getUserById(idUser);
+        User friend = getUserById(idFriend);
+
+        user.getFriendShips().put(idFriend, FriendShipStatus.UNCONFIRMED);
+        friend.getFriendShips().put(idUser, FriendShipStatus.UNCONFIRMED);
+
+        return user;
     }
 
     @Override
     public List<User> getCommonFriends(Long id, Long otherId) {
 
-        Set<Long> otherFriendList = users.get(otherId).getFriendList();
+        User user = getUserById(id);
+        User other = getUserById(otherId);
 
-        return users.get(id).getFriendList().stream()
-            .filter(otherFriendList::contains)
-            .map(users::get)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        Set<Long> first = user.getFriendShips().keySet();
+        Set<Long> second = other.getFriendShips().keySet();
 
+        return first.stream()
+                .filter(second::contains)
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public long nextIdGenerate() {
-        long nextId = users.keySet().stream()
-            .mapToLong(Long::longValue)
-            .max()
-            .orElse(0L);
-
-        return ++nextId;
+        return users.keySet().stream()
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(0L) + 1;
     }
 }

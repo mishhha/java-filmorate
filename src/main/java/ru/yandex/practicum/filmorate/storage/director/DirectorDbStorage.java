@@ -21,40 +21,40 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DirectorDbStorage implements DirectorStorage {
 
-    private static final String FIND_ALL = """
-        SELECT d.id,
-               d.name
-        FROM directors AS d
-    """;
-
-    private static final String FIND_DIRECTOR_BY_ID = """
-        SELECT d.id,
-               d.name
-        FROM directors AS d
-        WHERE d.id = ?
-    """;
-
-    private static final String INSERT_DIRECTOR = """
-        INSERT INTO directors (name)
-        VALUES (?)
-    """;
-
-    private static final String UPDATE_DIRECTOR_BY_ID = """
-        UPDATE directors
-        SET name = ?
-        WHERE id = ?
-    """;
-
-    private static final String DELETE_DIRECTOR_BY_ID = """
-        DELETE FROM directors WHERE id = ?
-    """;
-
-    private static final String CHECK_DIRECTOR_EXISTS = """
-        SELECT EXISTS (SELECT 1, FROM directors WHERE id = ?)
-    """;
-
     private final JdbcTemplate jdbc;
     private final DirectorRowMapper directorRowMapper;
+
+    private static final String FIND_ALL = """
+                SELECT d.id,
+                       d.name
+                FROM directors d
+            """;
+
+    private static final String FIND_BY_ID = """
+                SELECT d.id,
+                       d.name
+                FROM directors d
+                WHERE d.id = ?
+            """;
+
+    private static final String INSERT = """
+                INSERT INTO directors (name)
+                VALUES (?)
+            """;
+
+    private static final String UPDATE = """
+                UPDATE directors
+                SET name = ?
+                WHERE id = ?
+            """;
+
+    private static final String DELETE = """
+                DELETE FROM directors WHERE id = ?
+            """;
+
+    private static final String CHECK_EXISTS = """
+                SELECT COUNT(*) FROM directors WHERE id = ?
+            """;
 
     @Override
     public List<Director> getDirectors() {
@@ -64,49 +64,56 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director getDirectorById(Long id) {
         checkDirectorExists(id);
-        return jdbc.queryForObject(FIND_DIRECTOR_BY_ID, directorRowMapper, id);
+        return jdbc.queryForObject(FIND_BY_ID, directorRowMapper, id);
     }
 
     @Override
     public Director addDirector(Director director) {
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    INSERT_DIRECTOR, Statement.RETURN_GENERATED_KEYS
+                    INSERT,
+                    Statement.RETURN_GENERATED_KEYS
             );
             ps.setString(1, director.getName());
             return ps;
         }, keyHolder);
 
-        director.setId(keyHolder.getKey().longValue());
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("Не удалось получить ID режиссёра");
+        }
 
+        director.setId(key.longValue());
         return getDirectorById(director.getId());
     }
 
     @Override
     public Director updateDirector(Director director) {
         checkDirectorExists(director.getId());
-        jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(UPDATE_DIRECTOR_BY_ID);
-            ps.setString(1, director.getName());
-            ps.setLong(2, director.getId());
-            return ps;
-        });
+
+        jdbc.update(UPDATE,
+                director.getName(),
+                director.getId()
+        );
 
         return getDirectorById(director.getId());
     }
 
+
     @Override
     public void deleteDirectorById(Long directorId) {
         checkDirectorExists(directorId);
-        jdbc.update(DELETE_DIRECTOR_BY_ID, directorId);
+        jdbc.update(DELETE, directorId);
     }
 
     @Override
     public void checkDirectorExists(Long id) {
-        boolean directorExist = Boolean.TRUE.equals(jdbc.queryForObject(CHECK_DIRECTOR_EXISTS, Boolean.class, id));
-        if (!directorExist) {
+        Integer count = jdbc.queryForObject(CHECK_EXISTS, Integer.class, id);
+
+        if (count == null || count == 0) {
             log.warn("Режиссёр с id {} не найден", id);
             throw new NotFoundException("Режиссёр с id " + id + " не найден");
         }

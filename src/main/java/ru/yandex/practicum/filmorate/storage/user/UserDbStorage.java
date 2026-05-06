@@ -74,7 +74,7 @@ public class UserDbStorage implements UserStorage {
             """;
 
     private static final String CHECK_USER_EXISTS_BY_ID = """
-                SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+                SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
             """;
 
     private static final String GET_LIKE_FILM_BY_USER = """
@@ -128,25 +128,20 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getUsers() {
-        List<User> users = jdbc.query(FIND_ALL, rowMapper);
-        users.stream().forEach(user -> {
-            user.setLikesFilms(getFilmsLike(user.getId()));
-        });
 
-        return users;
+    public List<User> getUsers() {
+        return jdbc.query(FIND_ALL, rowMapper);
+
     }
 
     @Override
     public User getUserById(Long id) {
         try {
-            User user = jdbc.queryForObject(FIND_BY_ID, rowMapper, id);
-            user.setLikesFilms(getFilmsLike(id));
-
-            return user;
+            return jdbc.queryForObject(FIND_BY_ID, rowMapper, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
+
     }
 
     @Override
