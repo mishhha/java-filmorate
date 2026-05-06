@@ -35,14 +35,14 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        validateFilm(film);
+        //validateFilm(film);
         return filmStorage.addFilm(film);
     }
 
 
     public Film updateFilm(Film film) {
         filmStorage.getFilmById(film.getId());
-        validateFilm(film);
+        //validateFilm(film);
         return filmStorage.updateFilm(film);
     }
 
@@ -116,7 +116,7 @@ public class FilmService {
     }
 
 
-    private void validateFilm(Film film) {
+   /* private void validateFilm(Film film) {
 
         if (film.getName() == null || film.getName().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -137,7 +137,7 @@ public class FilmService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Дата релиза — не раньше 28 декабря 1895 года");
         }
-    }
+    }*/
 
     /*
 

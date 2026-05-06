@@ -11,7 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+
 import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
@@ -84,7 +84,8 @@ public class FilmDbStorage implements FilmStorage {
             fillRelations(film);
             return film;
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Фильм не найден");
+            //throw new NotFoundException("Фильм не найден");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
     }
 
@@ -206,7 +207,7 @@ public class FilmDbStorage implements FilmStorage {
                               AND fg2.genre_id = ?
                     ))
                     AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
-                    GROUP BY f.id, m.id, m.name
+                    GROUP BY f.id
                     ORDER BY COUNT(DISTINCT l.user_id) DESC, f.id
                     LIMIT ?
                 """;
@@ -225,9 +226,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void addLike(Long filmId, Long userId) {
 
-        if (!filmExists(filmId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
-        }
 
         jdbc.update(
                 "INSERT INTO likes (film_id, user_id) VALUES (?, ?)",
@@ -238,9 +236,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void removeLike(Long filmId, Long userId) {
 
-        if (!filmExists(filmId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
-        }
 
         jdbc.update(
                 "DELETE FROM likes WHERE film_id = ? AND user_id = ?",
@@ -275,7 +270,7 @@ public class FilmDbStorage implements FilmStorage {
     private void fillRelations(Film film) {
         film.setGenres(loadGenres(film.getId()));
         film.setLikes(loadLikes(film.getId()));
-        film.setDirectors(loadDirectors(film.getId()));
+        //film.setDirectors(loadDirectors(film.getId()));
 
 
     }
@@ -374,9 +369,4 @@ public class FilmDbStorage implements FilmStorage {
         return films.stream().sorted(comparator).toList();
     }
 
-    private boolean filmExists(Long filmId) {
-        String sql = "SELECT COUNT(*) FROM films WHERE id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, filmId);
-        return count != null && count > 0;
-    }
 }
