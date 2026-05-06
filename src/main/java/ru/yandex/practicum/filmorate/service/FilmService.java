@@ -31,16 +31,41 @@ public class FilmService {
         return filmStorage.findFilmsByPopular();
     }
 
-    public List<Film> searchFilmBySubstring(String nameFilm, String by) {
-        if (by == null || by.isBlank()) {
-            List<Film> searchFilms = filmStorage.searchFilmBySubstring(nameFilm.toLowerCase());
-            if (searchFilms == null) {
-                throw new NotFoundException("Фильма с названием " + nameFilm + " не найдено.");
-            }
-            return searchFilms;
-        }
-        String[] param = by.split(",");
+    public List<Film> searchFilmBySubstring(String query, String by) {
 
+        List<Film> searchFilms = List.of();
+
+        if(by == null || by.isBlank()) {
+            searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
+        } else {
+            String[] split = by.split(",");
+            boolean title = false;
+            boolean director = false;
+
+            for (String search : split) {
+                if (search.trim().equalsIgnoreCase("title")) {
+                    title = true;
+                } else if (search.trim().equalsIgnoreCase("director")) {
+                    director = true;
+                } else {
+                    throw new ValidationException("Указаны неверные параметры поиска" + search);
+                }
+            }
+
+            if (title && director) {
+                searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
+            } else if (title) {
+                searchFilms = filmStorage.searchFilmBySubstring(query);
+            } else if (director) {
+                searchFilms = filmStorage.searchFilmByDirector(query);
+            }
+        }
+
+        if (searchFilms.isEmpty()) {
+            throw new NotFoundException("Фильмы по запросу " + query + " не найдены");
+        }
+
+        return searchFilms;
     }
 
     public void deleteFilmById(Long filmId) {

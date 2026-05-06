@@ -175,7 +175,7 @@ public class FilmDbStorage implements FilmStorage {
         SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
         """;
 
-    private static final String FIND_NAME_FILM_BY_SUBSTRING = """
+    private static final String FIND_FILM_BY_SUBSTRING = """
         SELECT f.id,
                f.name,
                f.description,
@@ -190,11 +190,26 @@ public class FilmDbStorage implements FilmStorage {
         WHERE f.name ILIKE ?
         """;
 
-    // Составной запрос + SQL инъекции(защита)
+    private static final String FIND_FILM_DIRECTOR_BY_SUBSTRING = """
+        SELECT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               f.mpa_rating_id,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        LEFT JOIN films_directors AS fd ON f.id = fd.film_id
+        JOIN directors AS d ON fd.director_id = d.id
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        WHERE d.name ILIKE ?
+        """;
 
     private static final String CHECK_DIRECTOR_EXISTS_BY_ID = """
-        SELECT EXISTS (SELECT 1, FROM directors WHERE id = ?)
-    """;
+        SELECT EXISTS (SELECT 1 FROM directors WHERE id = ?)
+        """;
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
@@ -208,7 +223,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchFilmBySubstring(String query) {
-        return jdbc.query(FIND_NAME_FILM_BY_SUBSTRING, filmRowMapper, "%" + query + "%");
+        return jdbc.query(FIND_FILM_BY_SUBSTRING, filmRowMapper, "%" + query + "%");
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String director) {
+        if (director == null || director.isBlank()) {
+            return List.of();
+        }
+        List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING, filmRowMapper, "%" + director + "%");
+        if(films.isEmpty()) {
+            throw new NotFoundException("Режиссер с именем " + director + " не найден");
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query) {
+        String q = " OR f.name ILIKE ?";
+        List<Film> searchFilms = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING + q, filmRowMapper, "%" + query + "%", "%" + query + "%");
+        if(searchFilms.isEmpty()) {
+            throw new NotFoundException("Фильмы по запросу " + query + " не найдены");
+        }
+        return searchFilms;
     }
 
     @Override

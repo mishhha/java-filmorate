@@ -24,7 +24,7 @@ public class FilmController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<Film> findFilmByName(
+    public List<Film> searchFilms(
         @RequestParam (required = false) String query,
         @RequestParam (required = false) String by
     ) {
