@@ -266,7 +266,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> findTopFilmsByGenresAndYear(Long count, Long genreId, Long year) {
         List<Film> films;
-        if(genreId == null) {
+        if (genreId == null) {
             String sql = """
                 SELECT f.id,
                       f.name,
