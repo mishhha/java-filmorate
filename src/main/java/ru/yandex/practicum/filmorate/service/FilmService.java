@@ -30,6 +30,14 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
+    public List<Film> searchTopFilmsByGenreAndYear(Long count, Long genre, Long year) {
+        LocalDate ld = LocalDate.of(year.intValue(),1, 1);
+        if (ld.isBefore(MIN_DATE_RELEASE)) {
+            return List.of();
+        }
+        return filmStorage.findTopFilmsByGenresAndYear(count, genre, year);
+    }
+
     public List<Film> searchTopFilms() {
         return filmStorage.findFilmsByPopular();
     }

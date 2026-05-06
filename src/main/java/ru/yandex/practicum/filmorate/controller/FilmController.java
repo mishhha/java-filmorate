@@ -76,9 +76,22 @@ public class FilmController {
         filmService.userDislikesFilm(id, userId);
     }
 
-    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
         return filmService.getTopFilmsByLikes(count);
+    }
+
+    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> findTopFilmsByGenreAndYear(
+        @RequestParam (value = "count", defaultValue = "10") @Positive Long limit,
+        @RequestParam (value = "genreId", required = false) @Positive Long genreId,
+        @RequestParam (value = "year", required = false) @Positive Long year
+    ) {
+        if(genreId == null || year == null) {
+            return filmService.getTopFilmsByLikes(limit.intValue());
+        }
+            return filmService.searchTopFilmsByGenreAndYear(limit, genreId, year);
     }
 
     @GetMapping("/common")

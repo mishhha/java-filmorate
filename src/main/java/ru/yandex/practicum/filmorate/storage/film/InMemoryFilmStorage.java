@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     public InMemoryFilmStorage(UserService userService, DirectorService directorService) {
         this.userService = userService;
         this.directorService = directorService;
+    }
+
+    @Override
+    public List<Film> findTopFilmsByGenresAndYear(Long count, Long genreId, Long year) {
+        return films.values().stream()
+            .filter(film -> film.getReleaseDate().getYear() == year)
+            .filter(film -> film.getGenres().stream().anyMatch(genre -> Objects.equals(genre.getId(), genreId)))
+            .sorted(Comparator.comparingLong(Film::getLikes).reversed())
+            .limit(count)
+            .toList();
     }
 
     @Override

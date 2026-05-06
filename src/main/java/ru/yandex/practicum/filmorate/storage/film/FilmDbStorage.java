@@ -209,6 +209,26 @@ public class FilmDbStorage implements FilmStorage {
         SELECT EXISTS (SELECT 1 FROM directors WHERE id = ?)
         """;
 
+
+    private static final String FIND_TOP_FILMS_BY_GENRE_AND_YEAR = """
+        SELECT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               f.mpa_rating_id,
+               fg.genre_id,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        JOIN film_genres AS fg ON f.id = fg.film_id
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        WHERE EXTRACT(YEAR FROM f.release_date) = ? AND fg.genre_id = ?
+        ORDER BY f.likes_count DESC
+        LIMIT ?
+        """;
+
     private final JdbcTemplate jdbc;
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
@@ -217,6 +237,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> findFilmsByPopular() {
         List<Film> films = jdbc.query(SEARCH_TOP_FILMS_QUERY, filmRowMapper);
+        for (Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+        return films;
+    }
+
+    @Override
+    public List<Film> findTopFilmsByGenresAndYear(Long count, Long genreId, Long year) {
+        List<Film> films = jdbc.query(FIND_TOP_FILMS_BY_GENRE_AND_YEAR, filmRowMapper, year, genreId, count);
         for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
