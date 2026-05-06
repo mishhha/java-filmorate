@@ -88,7 +88,7 @@ public class FilmController {
         @RequestParam (value = "genreId", required = false) @Positive Long genreId,
         @RequestParam (value = "year", required = false) @Positive Long year
     ) {
-        if(genreId == null || year == null) {
+        if (genreId == null || year == null) {
             return filmService.getTopFilmsByLikes(limit.intValue());
         }
             return filmService.searchTopFilmsByGenreAndYear(limit, genreId, year);
