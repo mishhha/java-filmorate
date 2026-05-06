@@ -61,10 +61,6 @@ public class FilmService {
             }
         }
 
-        if (searchFilms.isEmpty()) {
-            throw new NotFoundException("Фильмы по запросу " + query + " не найдены");
-        }
-
         return searchFilms;
     }
 
