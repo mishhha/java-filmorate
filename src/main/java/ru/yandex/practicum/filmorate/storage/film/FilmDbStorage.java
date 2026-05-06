@@ -274,6 +274,8 @@ public class FilmDbStorage implements FilmStorage {
                       f.release_date,
                       f.duration,
                       f.likes_count,
+                      f.mpa_rating_id,
+                      fg.genre_id,
                       m.id AS rating_id,
                       m.name AS rating_name
                 FROM films f
