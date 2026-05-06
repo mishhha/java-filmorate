@@ -55,6 +55,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
         if (film.getGenres() != null) {
+
             film.setGenres(new HashSet<>(film.getGenres()));
         }
 
@@ -84,6 +85,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         existing.setRating(film.getRating());
 
         if (film.getGenres() != null) {
+
             existing.setGenres(new HashSet<>(film.getGenres()));
         }
 

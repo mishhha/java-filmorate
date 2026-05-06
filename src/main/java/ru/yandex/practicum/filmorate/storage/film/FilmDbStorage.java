@@ -187,23 +187,27 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
 
         String sql = """
-    SELECT f.id,
-           f.name,
-           f.description,
-           f.release_date,
-           f.duration,
-           m.id AS rating_id,
-           m.name AS rating_name
-    FROM films f
-    LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
-    LEFT JOIN film_genres fg ON f.id = fg.film_id
-    LEFT JOIN likes l ON f.id = l.film_id
-    WHERE (? IS NULL OR fg.genre_id = ?)
-      AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
-    GROUP BY f.id, m.id, m.name
-    ORDER BY COUNT(DISTINCT l.user_id) DESC
-    LIMIT ?
-""";
+                    SELECT f.id,
+                           f.name,
+                           f.description,
+                           f.release_date,
+                           f.duration,
+                           m.id AS rating_id,
+                           m.name AS rating_name
+                    FROM films f
+                    LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
+                    LEFT JOIN likes l ON f.id = l.film_id
+                    WHERE (? IS NULL OR EXISTS (
+                            SELECT 1
+                            FROM film_genres fg2
+                            WHERE fg2.film_id = f.id
+                              AND fg2.genre_id = ?
+                    ))
+                    AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
+                    GROUP BY f.id, m.id, m.name
+                    ORDER BY COUNT(DISTINCT l.user_id) DESC
+                    LIMIT ?
+                """;
 
         List<Film> films = jdbc.query(sql, filmRowMapper,
                 genreId, genreId,
@@ -260,8 +264,24 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(loadGenres(film.getId()));
         film.setLikes(loadLikes(film.getId()));
         film.setDirectors(loadDirectors(film.getId()));
+
+
     }
 
+    private Set<Genre> loadGenres(Long filmId) {
+        String sql = """
+                SELECT g.id, g.name
+                FROM genres g
+                JOIN film_genres fg ON g.id = fg.genre_id
+                WHERE fg.film_id = ?
+                ORDER BY g.id
+                """;
+
+        List<Genre> genres = jdbc.query(sql, genreRowMapper, filmId);
+
+        return new LinkedHashSet<>(genres);
+    }
+     /*
     private Set<Genre> loadGenres(Long filmId) {
         String sql = """
                 SELECT g.id, g.name
@@ -271,7 +291,8 @@ public class FilmDbStorage implements FilmStorage {
                 """;
 
         return new HashSet<>(jdbc.query(sql, genreRowMapper, filmId));
-    }
+    }*/
+
 
     private Set<Long> loadLikes(Long filmId) {
         String sql = "SELECT user_id FROM likes WHERE film_id = ?";
