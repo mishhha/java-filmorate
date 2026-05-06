@@ -219,7 +219,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> findFilmsByPopular() {
         List<Film> films = jdbc.query(SEARCH_TOP_FILMS_QUERY, filmRowMapper);
-        for(Film film : films) {
+        for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
@@ -229,7 +229,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilmBySubstring(String query) {
         List<Film> films = jdbc.query(FIND_FILM_BY_SUBSTRING, filmRowMapper, "%" + query + "%");
-        for(Film film : films) {
+        for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
@@ -242,7 +242,7 @@ public class FilmDbStorage implements FilmStorage {
             return List.of();
         }
         List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING, filmRowMapper, "%" + director + "%");
-        for(Film film : films) {
+        for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
@@ -253,7 +253,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchFilmsByTitleAndDirector(String query) {
         String q = " OR f.name ILIKE ?";
         List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING + q, filmRowMapper, "%" + query + "%", "%" + query + "%");
-        for(Film film : films) {
+        for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
         }
