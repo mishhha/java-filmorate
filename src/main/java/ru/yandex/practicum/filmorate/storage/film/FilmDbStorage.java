@@ -232,7 +232,7 @@ public class FilmDbStorage implements FilmStorage {
             return List.of();
         }
         List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING, filmRowMapper, "%" + director + "%");
-        if(films.isEmpty()) {
+        if (films.isEmpty()) {
             throw new NotFoundException("Режиссер с именем " + director + " не найден");
         }
         return films;
@@ -242,7 +242,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchFilmsByTitleAndDirector(String query) {
         String q = " OR f.name ILIKE ?";
         List<Film> searchFilms = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING + q, filmRowMapper, "%" + query + "%", "%" + query + "%");
-        if(searchFilms.isEmpty()) {
+        if (searchFilms.isEmpty()) {
             throw new NotFoundException("Фильмы по запросу " + query + " не найдены");
         }
         return searchFilms;
