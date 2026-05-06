@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.sql.Types;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -254,7 +255,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     private Set<Genre> getGenresByFilmId(Long filmId) {
-        return new HashSet<>(jdbc.query(
+        return new LinkedHashSet<>(jdbc.query(
                 FIND_GENRES_BY_FILM_ID,
                 genreRowMapper,
                 filmId
