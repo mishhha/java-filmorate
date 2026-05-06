@@ -191,7 +191,7 @@ public class FilmDbStorage implements FilmStorage {
         """;
 
     private static final String FIND_FILM_DIRECTOR_BY_SUBSTRING = """
-        SELECT f.id,
+        SELECT DISTINCT f.id,
                f.name,
                f.description,
                f.release_date,
