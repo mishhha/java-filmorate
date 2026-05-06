@@ -35,7 +35,7 @@ public class FilmService {
 
         List<Film> searchFilms = List.of();
 
-        if(by == null || by.isBlank()) {
+        if (by == null || by.isBlank()) {
             searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
         } else {
             String[] split = by.split(",");
