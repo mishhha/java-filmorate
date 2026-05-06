@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film;
+/*package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -97,22 +97,32 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
 
+
     @Override
     public void addLike(Long filmId, Long userId) {
-        Film film = getFilmById(filmId);
-        userService.getUsersById(userId);
+        Film film = films.get(filmId); // важно: из Map напрямую
 
-        film.getLikesSet().add(userId);
+        if (film == null) {
+            throw new NotFoundException("Фильм не найден");
+        }
 
+        userService.getUserById(userId);
+
+        film.getLikes().add(userId);
     }
+
 
     @Override
     public void removeLike(Long filmId, Long userId) {
-        Film film = getFilmById(filmId);
-        userService.getUsersById(userId);
+        Film film = films.get(filmId);
 
-        film.getLikesSet().remove(userId);
+        if (film == null) {
+            throw new NotFoundException("Фильм не найден");
+        }
 
+        userService.getUserById(userId);
+
+        film.getLikes().remove(userId);
     }
 
 
@@ -137,7 +147,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
                     return film.getReleaseDate().getYear() == year;
                 })
-                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
+                //.sorted(Comparator.comparingInt(Film::getLikes).reversed())
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
 
                 .limit(count)
                 .collect(Collectors.toList());
@@ -148,12 +159,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getCommonFilms(Long userId, Long friendId) {
 
         Set<Long> userLikes = films.values().stream()
-                .filter(f -> f.getLikesSet().contains(userId))
+                .filter(f -> f.getLikes().contains(userId))
                 .map(Film::getId)
                 .collect(Collectors.toSet());
 
         Set<Long> friendLikes = films.values().stream()
-                .filter(f -> f.getLikesSet().contains(friendId))
+                .filter(f -> f.getLikes().contains(friendId))
                 .map(Film::getId)
                 .collect(Collectors.toSet());
 
@@ -161,7 +172,8 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .filter(friendLikes::contains)
                 .map(films::get)
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
+                //.sorted(Comparator.comparingInt(Film::getLikes).reversed())
 
                 .collect(Collectors.toList());
     }
@@ -176,7 +188,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         Comparator<Film> comparator = switch (sortBy.toLowerCase()) {
 
-            case "likes" -> Comparator.comparingInt(Film::getLikes).reversed();
+            case "likes" -> Comparator.comparingInt(Film::getLikesCount).reversed();
+                    //Comparator.comparingInt(Film::getLikes).reversed();
 
             case "year" -> Comparator.comparing(
                     Film::getReleaseDate,
@@ -201,4 +214,4 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .max()
                 .orElse(0L) + 1;
     }
-}
+}*/

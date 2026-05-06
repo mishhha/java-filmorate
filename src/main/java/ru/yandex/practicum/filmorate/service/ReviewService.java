@@ -26,7 +26,7 @@ public class ReviewService {
     public Review create(Review review) {
         validate(review);
 
-        userService.getUsersById(review.getUserId());
+        userService.getUserById(review.getUserId());
         filmService.getFilmById(review.getFilmId());
 
         review.setUseful(0);

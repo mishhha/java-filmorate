@@ -47,7 +47,7 @@ public class UserController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public User getUsersById(@PathVariable Long id) {
-        return userService.getUsersById(id);
+        return userService.getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
@@ -77,14 +77,5 @@ public class UserController {
         return userService.getCommonFriend(id, otherId);
     }
 
-    /*
-    Рекомендации фильмов для пользователя, по схожим интересам других пользователей
-     */
-    @GetMapping("/{id}/recommendations")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Film> getRecommendations(
-            @PathVariable @PositiveOrZero Long id
-    ) {
-        return userService.getRecommendations(id);
-    }
+
 }
