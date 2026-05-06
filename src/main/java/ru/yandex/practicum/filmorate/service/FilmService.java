@@ -2,9 +2,10 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -66,6 +67,29 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+
+        if (count <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Параметр count должен быть больше 0");
+        }
+
+        return filmStorage.getFilms().stream()
+                .filter(film -> genreId == null ||
+                        (film.getGenres() != null &&
+                                film.getGenres().stream().anyMatch(g -> g.getId().equals(genreId))))
+                .filter(film -> year == null ||
+                        (film.getReleaseDate() != null &&
+                                film.getReleaseDate().getYear() == year))
+                .sorted((f1, f2) -> Integer.compare(
+                        f2.getLikesSet() == null ? 0 : f2.getLikesSet().size(),
+                        f1.getLikesSet() == null ? 0 : f1.getLikesSet().size()
+                ))
+                .limit(count)
+                .toList();
+    }
+
+
+    /*    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
         if (count <= 0) {
             throw new ValidationException("Параметр count должен быть больше 0");
         }
@@ -83,7 +107,7 @@ public class FilmService {
                 ))
                 .limit(count)
                 .toList();
-    }
+    }*/
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         userStorage.getUserById(userId);
@@ -93,28 +117,63 @@ public class FilmService {
 
 
     private void validateFilm(Film film) {
+
         if (film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException("Имя фильма не может быть пустым.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Имя фильма не может быть пустым.");
         }
 
         if (film.getDuration() <= 0) {
-            throw new ValidationException("Продолжительность фильма должна быть положительной.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Продолжительность фильма должна быть положительной.");
         }
 
         if (film.getDescription() == null || film.getDescription().length() > 200) {
-            log.warn("Некорректная длина описания: {}", film.getDescription());
-            throw new ValidationException("Максимальная длина описания — 200 символов");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Максимальная длина описания — 200 символов");
         }
 
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Дата релиза — не раньше 28 декабря 1895 года");
+        }
+    }
+
+    /*
+
+    private void validateFilm(Film film) {
+        if (film.getName() == null || film.getName().isBlank()) {
+            //throw new ValidationException("Имя фильма не может быть пустым.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Имя фильма не может быть пустым.");
+        }
+
+        if (film.getDuration() <= 0) {
+            //throw new ValidationException("Продолжительность фильма должна быть положительной.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Продолжительность фильма должна быть положительной.");
+        }
+
+        if (film.getDescription() == null || film.getDescription().length() > 200) {
+            //log.warn("Некорректная длина описания: {}", film.getDescription());
+            //throw new ValidationException("Максимальная длина описания — 200 символов");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Максимальная длина описания — 200 символов");
+        }
+
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
+            //throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Дата релиза — не раньше 28 декабря 1895 года");
         }
 
         if (film.getRating() != null && film.getRating().getId() != null) {
             int ratingId = Math.toIntExact(film.getRating().getId());
             if (ratingId <= 0 || ratingId > 5) {
-                throw new NotFoundException("Рейтинга с id " + ratingId + " не существует.");
+                //throw new NotFoundException("Рейтинга с id " + ratingId + " не существует.");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Рейтинга с id " + ratingId + " не существует.");
             }
         }
-    }
+    }*/
 }

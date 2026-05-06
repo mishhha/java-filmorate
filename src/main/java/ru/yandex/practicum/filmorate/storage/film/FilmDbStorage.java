@@ -5,10 +5,12 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.model.film.Film;
@@ -205,7 +207,7 @@ public class FilmDbStorage implements FilmStorage {
                     ))
                     AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
                     GROUP BY f.id, m.id, m.name
-                    ORDER BY COUNT(DISTINCT l.user_id) DESC
+                    ORDER BY COUNT(DISTINCT l.user_id) DESC, f.id
                     LIMIT ?
                 """;
 
@@ -222,6 +224,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Long filmId, Long userId) {
+
+        if (!filmExists(filmId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
+        }
+
         jdbc.update(
                 "INSERT INTO likes (film_id, user_id) VALUES (?, ?)",
                 filmId, userId
@@ -230,6 +237,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeLike(Long filmId, Long userId) {
+
+        if (!filmExists(filmId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
+        }
+
         jdbc.update(
                 "DELETE FROM likes WHERE film_id = ? AND user_id = ?",
                 filmId, userId
@@ -360,5 +372,11 @@ public class FilmDbStorage implements FilmStorage {
         System.out.println(jdbc.queryForList("SELECT * FROM films_directors"));
 
         return films.stream().sorted(comparator).toList();
+    }
+
+    private boolean filmExists(Long filmId) {
+        String sql = "SELECT COUNT(*) FROM films WHERE id = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, filmId);
+        return count != null && count > 0;
     }
 }
