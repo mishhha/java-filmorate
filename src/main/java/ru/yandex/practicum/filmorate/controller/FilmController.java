@@ -72,7 +72,7 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable Long userId) {
         filmService.userDislikesFilm(id, userId);
     }
 

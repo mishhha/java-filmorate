@@ -173,6 +173,10 @@ public class FilmDbStorage implements FilmStorage {
         SELECT EXISTS (SELECT 1 FROM films WHERE id = ?)
         """;
 
+    private static final String CHECK_USER_EXISTS_BY_ID_QUERY = """
+    SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
+    """;
+
     private static final String FIND_FILM_BY_SUBSTRING = """
         SELECT f.id,
                f.name,
@@ -353,7 +357,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getTopFilms(int count) {
-        return jdbc.query(FIND_TOP_FILMS_QUERY, filmRowMapper, count);
+        List<Film> films = jdbc.query(FIND_TOP_FILMS_QUERY, filmRowMapper, count);
+        for (Film film : films) {
+            film.setGenres(getGenresByFilmId(film.getId()));
+            film.setDirectors(getDirectorsByFilmId(film.getId()));
+        }
+        return films;
     }
 
     @Override
@@ -493,12 +502,24 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Long filmId, Long userId) {
+        if (!jdbc.queryForObject(CHECK_FILM_EXISTS_BY_ID_QUERY, Boolean.class, filmId)) {
+            throw new NotFoundException("Фильм с id " + filmId + " не найден");
+        }
+        if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
         jdbc.update(INSERT_ADD_LIKE, filmId, userId);
         jdbc.update(UPDATE_FILM_LIKES, filmId);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
+        if (!jdbc.queryForObject(CHECK_FILM_EXISTS_BY_ID_QUERY, Boolean.class, filmId)) {
+            throw new NotFoundException("Фильм с id " + filmId + " не найден");
+        }
+        if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
         jdbc.update(DELETE_LIKE_FILM, filmId, userId);
         jdbc.update(UPDATE_DISLIKES_FILM, filmId);
     }
