@@ -177,6 +177,10 @@ public class FilmDbStorage implements FilmStorage {
     SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
     """;
 
+    private static final String CHECK_LIKE_EXISTS = """
+    SELECT EXISTS (SELECT 1 FROM likes WHERE film_id = ? AND user_id = ?)
+    """;
+
     private static final String FIND_FILM_BY_SUBSTRING = """
         SELECT f.id,
                f.name,
@@ -519,6 +523,9 @@ public class FilmDbStorage implements FilmStorage {
         }
         if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
+        if (jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId)) {
+            return;
         }
         jdbc.update(DELETE_LIKE_FILM, filmId, userId);
         jdbc.update(UPDATE_DISLIKES_FILM, filmId);
