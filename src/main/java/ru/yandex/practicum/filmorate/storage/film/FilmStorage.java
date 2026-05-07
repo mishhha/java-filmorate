@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface FilmStorage {
 
+    List<Film> findTopFilmsByGenresAndYear(Long count, Long genreId, Long year);
+
     List<Film> searchFilmsByTitleAndDirector(String query);
 
     List<Film> searchFilmByDirector(String director);
