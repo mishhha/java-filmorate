@@ -525,19 +525,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public boolean addLike(Long filmId, Long userId) {
+    public void addLike(Long filmId, Long userId) {
         if (!jdbc.queryForObject(CHECK_FILM_EXISTS_BY_ID_QUERY, Boolean.class, filmId)) {
             throw new NotFoundException("Фильм с id " + filmId + " не найден");
         }
         if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        if (jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId)) {
-            return false;
-        }
         jdbc.update(INSERT_ADD_LIKE, filmId, userId);
         jdbc.update(UPDATE_FILM_LIKES, filmId);
-        return true;
     }
 
     @Override
