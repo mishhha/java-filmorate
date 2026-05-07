@@ -130,13 +130,15 @@ public class FilmService {
 
         filmStorage.addLike(id, userId);
 
-        //Добавление события в историю
-        userStorage.addEvent(Event.builder()
+        if (filmStorage.addLike(id, userId)) {
+            //Добавление события в историю
+            userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.ADD)
                 .entityId(id)
                 .build());
+        }
     }
 
     public void userDislikesFilm(Long id, Long userId) {
