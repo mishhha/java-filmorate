@@ -285,11 +285,9 @@ public class FilmDbStorage implements FilmStorage {
                        f.duration,
                        f.likes_count,
                        f.mpa_rating_id,
-                       fg.genre_id,
                        m.id AS rating_id,
                        m.name AS rating_name
                 FROM films f
-                JOIN film_genres AS fg ON f.id = fg.film_id
                 LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id
                 WHERE EXTRACT(YEAR FROM f.release_date) = ?
                 ORDER BY f.likes_count DESC
