@@ -77,7 +77,7 @@ public class UserDbStorage implements UserStorage {
             """;
 
     private static final String CHECK_USER_EXISTS_BY_ID = """
-                SELECT EXISTS (SELECT 1, FROM users WHERE id = ?)
+                SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
             """;
 
     private static final String GET_LIKE_FILM_BY_USER = """
@@ -89,7 +89,7 @@ public class UserDbStorage implements UserStorage {
             """;
 
     private static final String GET_EVENTS_BY_USER_ID = """
-                SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC
+                SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC, event_id ASC
             """;
 
     @Override
