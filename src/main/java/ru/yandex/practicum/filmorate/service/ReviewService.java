@@ -45,15 +45,22 @@ public class ReviewService {
             throw new ValidationException("Идентификатор отзыва не может быть пустым");
         }
 
+        Review oldReview = reviewStorage.getReviewById(review.getReviewId());
+
         review = reviewStorage.updateReview(review);
 
-        //Добавление события в историю
-        userStorage.addEvent(Event.builder()
+        boolean contentChanged = !oldReview.getContent().equals(review.getContent());
+        boolean ratingChanged = oldReview.getIsPositive() != review.getIsPositive();
+
+        if (contentChanged || ratingChanged) {
+            //Добавление события в историю
+            userStorage.addEvent(Event.builder()
                 .userId(review.getUserId())
                 .eventType(EventTypes.REVIEW)
                 .operation(EventOperations.UPDATE)
                 .entityId(review.getReviewId())
                 .build());
+        }
 
         return review;
     }
