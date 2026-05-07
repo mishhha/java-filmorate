@@ -29,7 +29,7 @@ public class ReviewDbStorage implements ReviewStorage {
             """;
 
     private static final String UPDATE_REVIEW = """
-                UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, film_id = ? WHERE id = ?
+                UPDATE reviews SET content = ?, is_positive = ? WHERE id = ?
             """;
 
     private static final String DELETE_REVIEW_BY_ID = """
@@ -37,7 +37,7 @@ public class ReviewDbStorage implements ReviewStorage {
             """;
 
     private static final String CHECK_REVIEW_EXISTS_BY_ID = """
-                SELECT EXISTS (SELECT 1, FROM reviews WHERE id = ?)
+                SELECT EXISTS (SELECT 1 FROM reviews WHERE id = ?)
             """;
 
     private static final String GET_REVIEW_BY_ID = """
@@ -67,7 +67,7 @@ public class ReviewDbStorage implements ReviewStorage {
             """;
 
     private static final String CHECK_REACTION_EXISTS_BY_ID = """
-                SELECT EXISTS (SELECT 1, FROM reactions WHERE review_id = ? AND user_id = ?)
+                SELECT EXISTS (SELECT 1 FROM reactions WHERE review_id = ? AND user_id = ?)
             """;
 
     private final Map<Long, Review> reviews = new HashMap<>();
@@ -100,8 +100,6 @@ public class ReviewDbStorage implements ReviewStorage {
         jdbc.update(UPDATE_REVIEW,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
                 review.getReviewId());
 
         return getReviewById(review.getReviewId());
