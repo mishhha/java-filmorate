@@ -89,7 +89,7 @@ public class UserDbStorage implements UserStorage {
             """;
 
     private static final String GET_EVENTS_BY_USER_ID = """
-                SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC, event_id ASC
+                SELECT * FROM events WHERE user_id = ? ORDER BY timestamp ASC, id ASC
             """;
 
     @Override
