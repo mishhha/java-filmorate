@@ -194,6 +194,7 @@ public class FilmDbStorage implements FilmStorage {
         FROM films AS f
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE f.name ILIKE ?
+        ORDER BY f.id ASC
         """;
 
     private static final String FIND_FILM_DIRECTOR_BY_SUBSTRING = """
@@ -211,6 +212,7 @@ public class FilmDbStorage implements FilmStorage {
         LEFT JOIN directors AS d ON fd.director_id = d.id
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE d.name ILIKE ?
+        ORDER BY f.id ASC
         """;
 
     private static final String CHECK_DIRECTOR_EXISTS_BY_ID = """
@@ -331,8 +333,24 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query) {
-        String q = " OR f.name ILIKE ?";
-        List<Film> films = jdbc.query(FIND_FILM_DIRECTOR_BY_SUBSTRING + q, filmRowMapper, "%" + query + "%", "%" + query + "%");
+        String sql = """
+        SELECT DISTINCT f.id,
+               f.name,
+               f.description,
+               f.release_date,
+               f.duration,
+               f.likes_count,
+               f.mpa_rating_id,
+               m.id AS rating_id,
+               m.name AS rating_name
+        FROM films AS f
+        LEFT JOIN films_directors AS fd ON f.id = fd.film_id
+        LEFT JOIN directors AS d ON fd.director_id = d.id
+        LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
+        WHERE d.name ILIKE ? OR f.name ILIKE ?
+        ORDER BY f.id ASC
+        """;
+        List<Film> films = jdbc.query(sql, filmRowMapper, "%" + query + "%", "%" + query + "%");
         for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
