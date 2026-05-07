@@ -512,6 +512,9 @@ public class FilmDbStorage implements FilmStorage {
         if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
+        if (jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId)) {
+            return;
+        }
         jdbc.update(INSERT_ADD_LIKE, filmId, userId);
         jdbc.update(UPDATE_FILM_LIKES, filmId);
     }
@@ -523,9 +526,6 @@ public class FilmDbStorage implements FilmStorage {
         }
         if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
-        if (jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId)) {
-            return;
         }
         jdbc.update(DELETE_LIKE_FILM, filmId, userId);
         jdbc.update(UPDATE_DISLIKES_FILM, filmId);
