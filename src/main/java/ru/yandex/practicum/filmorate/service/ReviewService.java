@@ -49,8 +49,8 @@ public class ReviewService {
 
         review = reviewStorage.updateReview(review);
 
-        boolean contentChanged = !oldReview.getContent().equals(review.getContent());
-        boolean ratingChanged = oldReview.getIsPositive() != review.getIsPositive();
+        boolean contentChanged = !Objects.equals(oldReview.getContent(), review.getContent());
+        boolean ratingChanged = !Objects.equals(oldReview.getIsPositive(), review.getIsPositive());
 
         if (contentChanged || ratingChanged) {
             //Добавление события в историю
@@ -111,7 +111,7 @@ public class ReviewService {
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(userId)
-                .eventType(EventTypes.DISLIKE)
+                .eventType(EventTypes.LIKE)
                 .operation(EventOperations.ADD)
                 .entityId(reviewId)
                 .build());
@@ -135,7 +135,7 @@ public class ReviewService {
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(userId)
-                .eventType(EventTypes.DISLIKE)
+                .eventType(EventTypes.LIKE)
                 .operation(EventOperations.REMOVE)
                 .entityId(reviewId)
                 .build());

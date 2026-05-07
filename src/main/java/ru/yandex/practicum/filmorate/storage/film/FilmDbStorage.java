@@ -174,8 +174,8 @@ public class FilmDbStorage implements FilmStorage {
         """;
 
     private static final String CHECK_USER_EXISTS_BY_ID_QUERY = """
-    SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
-    """;
+        SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)
+        """;
 
     private static final String CHECK_LIKE_EXISTS = """
     SELECT EXISTS (SELECT 1 FROM likes WHERE film_id = ? AND user_id = ?)
