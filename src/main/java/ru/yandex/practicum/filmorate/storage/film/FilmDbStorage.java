@@ -151,6 +151,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String INSERT_ADD_LIKE = """
         INSERT INTO likes (film_id, user_id) VALUES (?, ?)
+        ON CONFLICT (film_id, user_id) DO NOTHING
         """;
 
     private static final String UPDATE_FILM_LIKES = """
