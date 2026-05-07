@@ -94,6 +94,11 @@ public class ReviewService {
     }
 
     public void addLike(Long reviewId, Long userId) {
+
+        if (reviewStorage.isReactionExists(reviewId, userId, true)) {
+            return;
+        }
+
         reviewStorage.saveReaction(reviewId, userId, true);
 
         //Добавление события в историю
@@ -106,6 +111,11 @@ public class ReviewService {
     }
 
     public void addDislike(Long reviewId, Long userId) {
+
+        if (!reviewStorage.isReactionExists(reviewId, userId, true)) {
+            return;  // Лайка нет, событие не создаём
+        }
+
         reviewStorage.saveReaction(reviewId, userId, false);
 
         //Добавление события в историю
