@@ -65,7 +65,7 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
-    public User addFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
+    public User addFriend(@PathVariable @PositiveOrZero Long id, @PathVariable Long friendId) {
         return userService.addFriend(id, friendId);
     }
 

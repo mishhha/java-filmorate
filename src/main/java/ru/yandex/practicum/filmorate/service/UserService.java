@@ -36,8 +36,8 @@ public class UserService {
     public User addUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             log.warn("Пользователю {} назначено имя {} при регистрации.", user.getName(), user.getLogin());
+            user.setName(user.getLogin());
         }
-
         return userStorage.addUser(user);
     }
 
