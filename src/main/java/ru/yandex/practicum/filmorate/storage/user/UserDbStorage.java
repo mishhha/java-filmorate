@@ -221,7 +221,7 @@ public class UserDbStorage implements UserStorage {
             return ps;
         }, keyHolder);
 
-        event.setId(keyHolder.getKey().longValue());
+        event.setEventId(keyHolder.getKey().longValue());
     }
 
     @Override

@@ -15,7 +15,7 @@ public class EventRowMapper implements RowMapper<Event> {
     @Override
     public Event mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Event event = Event.builder()
-                .id(resultSet.getLong("id"))
+                .eventId(resultSet.getLong("id"))
                 .timestamp(resultSet.getLong("timestamp"))
                 .userId(resultSet.getLong("user_id"))
                 .eventType(EventTypes.valueOf(resultSet.getString("event_type")))
