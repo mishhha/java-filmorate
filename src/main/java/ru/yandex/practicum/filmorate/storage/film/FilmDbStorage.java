@@ -530,8 +530,8 @@ public class FilmDbStorage implements FilmStorage {
         if (!jdbc.queryForObject(CHECK_USER_EXISTS_BY_ID_QUERY, Boolean.class, userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        boolean exists = jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId);
-        if (!exists) {
+        boolean alreadyLiked = jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId);
+        if (alreadyLiked) {
             return false;
         }
         jdbc.update(INSERT_ADD_LIKE, filmId, userId);
