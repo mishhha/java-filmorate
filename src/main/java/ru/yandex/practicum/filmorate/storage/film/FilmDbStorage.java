@@ -230,7 +230,7 @@ public class FilmDbStorage implements FilmStorage {
         """;
 
     private static final String FIND_TOP_FILMS_BY_GENRE = """
-        SELECT f.id,
+        SELECT DISTINCT f.id,
                f.name,
                f.description,
                f.release_date,
@@ -268,7 +268,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films;
         if (genreId == null) {
             String sql = """
-                SELECT f.id,
+                SELECT DISTINCT f.id,
                        f.name,
                        f.description,
                        f.release_date,
