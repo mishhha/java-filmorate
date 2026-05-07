@@ -194,7 +194,7 @@ public class FilmDbStorage implements FilmStorage {
         FROM films AS f
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE f.name ILIKE ?
-        ORDER BY f.likes_count DESC, f.id ASC
+        ORDER BY f.likes_count DESC
         """;
 
     private static final String FIND_FILM_DIRECTOR_BY_SUBSTRING = """
@@ -523,20 +523,16 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Long filmId, Long userId) {
+    public boolean addLike(Long filmId, Long userId) {
         // Проверяем, существует ли уже лайк
-        Boolean exists = jdbc.queryForObject(
-            "SELECT EXISTS(SELECT 1 FROM likes WHERE film_id = ? AND user_id = ?)",
-            Boolean.class,
-            filmId, userId
-        );
-
-        if (Boolean.FALSE.equals(exists)) {
-            jdbc.update(
-                "INSERT INTO likes (film_id, user_id) VALUES (?, ?)",
-                filmId, userId
-            );
+        Boolean alreadyLiked = jdbc.queryForObject(CHECK_LIKE_EXISTS, Boolean.class, filmId, userId);
+        if (alreadyLiked != null && alreadyLiked) {
+            return false;
         }
+
+        jdbc.update(INSERT_ADD_LIKE, filmId, userId);
+        jdbc.update(UPDATE_FILM_LIKES, filmId);
+        return true;
     }
 
     @Override

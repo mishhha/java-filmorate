@@ -124,12 +124,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Long filmId, Long userId) {
+    public boolean addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         User user = userService.getUsersById(userId);
 
         film.addLike();
         user.addLikesFilms(filmId);
+        return true;
     }
 
     @Override
