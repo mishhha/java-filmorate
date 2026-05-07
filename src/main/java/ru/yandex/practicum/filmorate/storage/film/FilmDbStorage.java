@@ -194,7 +194,7 @@ public class FilmDbStorage implements FilmStorage {
         FROM films AS f
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE f.name ILIKE ?
-        ORDER BY f.id ASC
+        ORDER BY f.likes_count DESC, f.id ASC
         """;
 
     private static final String FIND_FILM_DIRECTOR_BY_SUBSTRING = """
@@ -212,7 +212,7 @@ public class FilmDbStorage implements FilmStorage {
         LEFT JOIN directors AS d ON fd.director_id = d.id
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE d.name ILIKE ?
-        ORDER BY f.id ASC
+        ORDER BY f.likes_count DESC, f.id ASC
         """;
 
     private static final String CHECK_DIRECTOR_EXISTS_BY_ID = """
@@ -348,9 +348,11 @@ public class FilmDbStorage implements FilmStorage {
         LEFT JOIN directors AS d ON fd.director_id = d.id
         LEFT JOIN mpa_ratings AS m ON f.mpa_rating_id = m.id
         WHERE d.name ILIKE ? OR f.name ILIKE ?
-        ORDER BY f.id ASC
+        ORDER BY f.likes_count DESC, f.id ASC
         """;
+
         List<Film> films = jdbc.query(sql, filmRowMapper, "%" + query + "%", "%" + query + "%");
+
         for (Film film : films) {
             film.setGenres(getGenresByFilmId(film.getId()));
             film.setDirectors(getDirectorsByFilmId(film.getId()));
