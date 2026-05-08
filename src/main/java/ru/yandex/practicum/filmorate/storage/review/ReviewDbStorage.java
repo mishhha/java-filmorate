@@ -70,8 +70,6 @@ public class ReviewDbStorage implements ReviewStorage {
                 SELECT EXISTS (SELECT 1 FROM reactions WHERE review_id = ? AND user_id = ?)
             """;
 
-    private final Map<Long, Review> reviews = new HashMap<>();
-
     @Override
     public Review addReview(Review review) {
 
