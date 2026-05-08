@@ -101,6 +101,13 @@ public class ReviewService {
 
     public void addDislike(Long reviewId, Long userId) {
         reviewStorage.saveReaction(reviewId, userId, false);
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+            .userId(userId)
+            .eventType(EventTypes.DISLIKE)
+            .operation(EventOperations.ADD)
+            .entityId(reviewId)
+            .build());
     }
 
     public void removeLike(Long reviewId, Long userId) {
@@ -117,6 +124,13 @@ public class ReviewService {
 
     public void removeDislike(Long reviewId, Long userId) {
         reviewStorage.deleteReaction(reviewId, userId);
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+            .userId(userId)
+            .eventType(EventTypes.DISLIKE)
+            .operation(EventOperations.REMOVE)
+            .entityId(reviewId)
+            .build());
     }
 
 }
