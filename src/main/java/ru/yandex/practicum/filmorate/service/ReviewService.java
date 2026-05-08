@@ -34,7 +34,7 @@ public class ReviewService {
             .userId(review.getUserId())
             .eventType(EventTypes.REVIEW)
             .operation(EventOperations.ADD)
-            .entityId(review.getReviewId())
+            .entityId(review.getFilmId())
             .build());
 
         return review;
@@ -52,7 +52,7 @@ public class ReviewService {
             .userId(review.getUserId())
             .eventType(EventTypes.REVIEW)
             .operation(EventOperations.UPDATE)
-            .entityId(review.getReviewId())
+            .entityId(review.getFilmId())
             .build());
 
         return review;
@@ -68,7 +68,7 @@ public class ReviewService {
             .userId(review.getUserId())
             .eventType(EventTypes.REVIEW)
             .operation(EventOperations.REMOVE)
-            .entityId(review.getReviewId())
+            .entityId(review.getFilmId())
             .build());
     }
 
