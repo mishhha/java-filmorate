@@ -13,9 +13,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.ReviewRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Primary
 @Repository("reviewDbStorage")
