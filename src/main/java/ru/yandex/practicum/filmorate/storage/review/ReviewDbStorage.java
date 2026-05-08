@@ -73,12 +73,6 @@ public class ReviewDbStorage implements ReviewStorage {
     private final Map<Long, Review> reviews = new HashMap<>();
 
     @Override
-    public boolean isReactionExists(Long reviewId, Long userId, Boolean isPositive) {
-        String sql = "SELECT COUNT(*) > 0 FROM reviews WHERE id = ? AND user_id = ? AND is_positive = ?";
-        return jdbc.queryForObject(sql, Boolean.class, reviewId, userId, isPositive);
-    }
-
-    @Override
     public Review addReview(Review review) {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();

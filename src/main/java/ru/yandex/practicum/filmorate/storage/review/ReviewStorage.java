@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface ReviewStorage {
 
-    boolean isReactionExists(Long reviewId, Long userId, Boolean isPositive);
-
     Review addReview(Review review);
 
     Review updateReview(Review review);

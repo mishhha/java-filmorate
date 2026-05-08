@@ -14,10 +14,6 @@ public class InMemoryReviewStorage implements ReviewStorage {
 
     private final Map<Long, Review> reviews = new HashMap<>();
 
-    @Override
-    public boolean isReactionExists(Long reviewId, Long userId, Boolean isPositive) {
-        return true;
-    }
 
     @Override
     public Review addReview(Review review) {

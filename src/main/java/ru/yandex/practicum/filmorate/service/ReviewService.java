@@ -31,11 +31,11 @@ public class ReviewService {
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
-                .userId(review.getUserId())
-                .eventType(EventTypes.REVIEW)
-                .operation(EventOperations.ADD)
-                .entityId(review.getReviewId())
-                .build());
+            .userId(review.getUserId())
+            .eventType(EventTypes.REVIEW)
+            .operation(EventOperations.ADD)
+            .entityId(review.getReviewId())
+            .build());
 
         return review;
     }
@@ -45,22 +45,15 @@ public class ReviewService {
             throw new ValidationException("Идентификатор отзыва не может быть пустым");
         }
 
-        Review oldReview = reviewStorage.getReviewById(review.getReviewId());
-
         review = reviewStorage.updateReview(review);
 
-        boolean contentChanged = !Objects.equals(oldReview.getContent(), review.getContent());
-        boolean ratingChanged = !Objects.equals(oldReview.getIsPositive(), review.getIsPositive());
-
-        if (contentChanged || ratingChanged) {
-            //Добавление события в историю
-            userStorage.addEvent(Event.builder()
-                .userId(review.getUserId())
-                .eventType(EventTypes.REVIEW)
-                .operation(EventOperations.UPDATE)
-                .entityId(review.getReviewId())
-                .build());
-        }
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+            .userId(review.getUserId())
+            .eventType(EventTypes.REVIEW)
+            .operation(EventOperations.UPDATE)
+            .entityId(review.getReviewId())
+            .build());
 
         return review;
     }
@@ -72,11 +65,11 @@ public class ReviewService {
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
-                .userId(review.getUserId())
-                .eventType(EventTypes.REVIEW)
-                .operation(EventOperations.REMOVE)
-                .entityId(review.getReviewId())
-                .build());
+            .userId(review.getUserId())
+            .eventType(EventTypes.REVIEW)
+            .operation(EventOperations.REMOVE)
+            .entityId(review.getReviewId())
+            .build());
     }
 
     public Review getById(Long id) {
@@ -86,45 +79,28 @@ public class ReviewService {
     public List<Review> getAll(Long filmId, int count) {
 
         return reviewStorage.getReviews().stream()
-                .filter(r -> filmId == null ||
-                        (r.getFilmId() != null && r.getFilmId().equals(filmId)))
-                .sorted(Comparator.comparingInt(Review::getUseful).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+            .filter(r -> filmId == null ||
+                (r.getFilmId() != null && r.getFilmId().equals(filmId)))
+            .sorted(Comparator.comparingInt(Review::getUseful).reversed())
+            .limit(count)
+            .collect(Collectors.toList());
     }
 
     public void addLike(Long reviewId, Long userId) {
-
-        if (reviewStorage.isReactionExists(reviewId, userId, true)) {
-            return;
-        }
 
         reviewStorage.saveReaction(reviewId, userId, true);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(EventOperations.ADD)
-                .entityId(reviewId)
-                .build());
+            .userId(userId)
+            .eventType(EventTypes.LIKE)
+            .operation(EventOperations.ADD)
+            .entityId(reviewId)
+            .build());
     }
 
     public void addDislike(Long reviewId, Long userId) {
-
-        if (!reviewStorage.isReactionExists(reviewId, userId, true)) {
-            return;  // Лайка нет, событие не создаём
-        }
-
         reviewStorage.saveReaction(reviewId, userId, false);
-
-        //Добавление события в историю
-        userStorage.addEvent(Event.builder()
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(EventOperations.ADD)
-                .entityId(reviewId)
-                .build());
     }
 
     public void removeLike(Long reviewId, Long userId) {
@@ -132,22 +108,15 @@ public class ReviewService {
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(EventOperations.REMOVE)
-                .entityId(reviewId)
-                .build());
+            .userId(userId)
+            .eventType(EventTypes.LIKE)
+            .operation(EventOperations.REMOVE)
+            .entityId(reviewId)
+            .build());
     }
 
     public void removeDislike(Long reviewId, Long userId) {
         reviewStorage.deleteReaction(reviewId, userId);
-
-        //Добавление события в историю
-        userStorage.addEvent(Event.builder()
-                .userId(userId)
-                .eventType(EventTypes.LIKE)
-                .operation(EventOperations.REMOVE)
-                .entityId(reviewId)
-                .build());
     }
+
 }
