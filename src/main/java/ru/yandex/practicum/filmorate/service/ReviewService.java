@@ -79,15 +79,14 @@ public class ReviewService {
     public List<Review> getAll(Long filmId, int count) {
 
         return reviewStorage.getReviews().stream()
-            .filter(r -> filmId == null ||
-                (r.getFilmId() != null && r.getFilmId().equals(filmId)))
-            .sorted(Comparator.comparingInt(Review::getUseful).reversed())
-            .limit(count)
-            .collect(Collectors.toList());
+                .filter(r -> filmId == null ||
+                        (r.getFilmId() != null && r.getFilmId().equals(filmId)))
+                .sorted(Comparator.comparingInt(Review::getUseful).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     public void addLike(Long reviewId, Long userId) {
-
         reviewStorage.saveReaction(reviewId, userId, true);
 
         //Добавление события в историю
@@ -101,6 +100,7 @@ public class ReviewService {
 
     public void addDislike(Long reviewId, Long userId) {
         reviewStorage.saveReaction(reviewId, userId, false);
+
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
             .userId(userId)
@@ -124,6 +124,7 @@ public class ReviewService {
 
     public void removeDislike(Long reviewId, Long userId) {
         reviewStorage.deleteReaction(reviewId, userId);
+
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
             .userId(userId)
@@ -132,5 +133,4 @@ public class ReviewService {
             .entityId(reviewId)
             .build());
     }
-
 }
