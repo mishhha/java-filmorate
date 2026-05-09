@@ -88,7 +88,6 @@ public class ReviewService {
     public void addLike(Long reviewId, Long userId) {
         reviewStorage.saveReaction(reviewId, userId, true);
 
-        /*
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
             .userId(userId)
@@ -97,26 +96,22 @@ public class ReviewService {
             .entityId(reviewId)
             .build());
 
-         */
     }
 
     public void addDislike(Long reviewId, Long userId) {
         reviewStorage.saveReaction(reviewId, userId, false);
 
         //Добавление события в историю
-        /* userStorage.addEvent(Event.builder()
+        userStorage.addEvent(Event.builder()
             .userId(userId)
             .eventType(EventTypes.DISLIKE)
             .operation(EventOperations.ADD)
             .entityId(reviewId)
             .build());
-
-        */
     }
 
     public void removeLike(Long reviewId, Long userId) {
         reviewStorage.deleteReaction(reviewId, userId);
-        /*
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
             .userId(userId)
@@ -124,13 +119,11 @@ public class ReviewService {
             .operation(EventOperations.REMOVE)
             .entityId(reviewId)
             .build());
-
-         */
     }
 
     public void removeDislike(Long reviewId, Long userId) {
         reviewStorage.deleteReaction(reviewId, userId);
-        /*
+
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
             .userId(userId)
@@ -138,8 +131,6 @@ public class ReviewService {
             .operation(EventOperations.REMOVE)
             .entityId(reviewId)
             .build());
-        */
-
 
     }
 }
