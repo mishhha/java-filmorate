@@ -77,7 +77,6 @@ public class ReviewService {
     }
 
     public List<Review> getAll(Long filmId, int count) {
-
         return reviewStorage.getReviews().stream()
                 .filter(r -> filmId == null ||
                         (r.getFilmId() != null && r.getFilmId().equals(filmId)))
