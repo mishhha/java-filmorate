@@ -15,8 +15,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
 @Slf4j
+@Service
 public class FilmService {
 
     private final FilmStorage filmStorage;
@@ -28,6 +28,50 @@ public class FilmService {
                        @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+    }
+
+    public List<Film> searchTopFilmsByGenreAndYear(Long count, Long genre, Long year) {
+        if (year != null && year < MIN_DATE_RELEASE.getYear()) {
+            return List.of();
+        }
+        return filmStorage.findTopFilmsByGenresAndYear(count, genre, year);
+    }
+
+    public List<Film> searchTopFilms() {
+        return filmStorage.findFilmsByPopular();
+    }
+
+    public List<Film> searchFilmBySubstring(String query, String by) {
+
+        List<Film> searchFilms = List.of();
+
+        if (by == null || by.isBlank()) {
+            searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
+        } else {
+            String[] split = by.split(",");
+            boolean title = false;
+            boolean director = false;
+
+            for (String search : split) {
+                if (search.trim().equalsIgnoreCase("title")) {
+                    title = true;
+                } else if (search.trim().equalsIgnoreCase("director")) {
+                    director = true;
+                } else {
+                    throw new ValidationException("Указаны неверные параметры поиска" + search);
+                }
+            }
+
+            if (title && director) {
+                searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
+            } else if (title) {
+                searchFilms = filmStorage.searchFilmBySubstring(query);
+            } else if (director) {
+                searchFilms = filmStorage.searchFilmByDirector(query);
+            }
+        }
+
+        return searchFilms;
     }
 
     public void deleteFilmById(Long filmId) {
@@ -81,15 +125,15 @@ public class FilmService {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
 
-        filmStorage.addLike(id, userId);
-
-        //Добавление события в историю
-        userStorage.addEvent(Event.builder()
+        if (filmStorage.addLike(id, userId)) {
+            //Добавление события в историю
+            userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.ADD)
                 .entityId(id)
                 .build());
+        }
     }
 
     public void userDislikesFilm(Long id, Long userId) {

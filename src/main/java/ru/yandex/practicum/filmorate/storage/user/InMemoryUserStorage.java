@@ -56,9 +56,9 @@ public class InMemoryUserStorage implements UserStorage {
         Set<Long> getFriendId = user.getFriendList();
 
         return getFriendId.stream()
-            .map(users::get)
-            .filter(Objects::nonNull)
-            .toList();
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Override
@@ -98,17 +98,17 @@ public class InMemoryUserStorage implements UserStorage {
         Set<Long> otherFriendList = users.get(otherId).getFriendList();
 
         return users.get(id).getFriendList().stream()
-            .filter(otherFriendList::contains)
-            .map(users::get)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+                .filter(otherFriendList::contains)
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void addEvent(Event event) {
-        event.setId(eventFeed.size() + 1L);
+        event.setEventId(eventFeed.size() + 1L);
         event.setTimestamp(Instant.now().toEpochMilli());
-        eventFeed.put(event.getId(), event);
+        eventFeed.put(event.getEventId(), event);
 
         log.info("Зарегистрирована операция {} по событию {}", event.getOperation(), event.getEventType());
     }
@@ -122,9 +122,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     public long nextIdGenerate() {
         long nextId = users.keySet().stream()
-            .mapToLong(Long::longValue)
-            .max()
-            .orElse(0L);
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(0L);
 
         return ++nextId;
     }

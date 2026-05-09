@@ -8,12 +8,7 @@ import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,6 +23,64 @@ public class InMemoryFilmStorage implements FilmStorage {
     public InMemoryFilmStorage(UserService userService, DirectorService directorService) {
         this.userService = userService;
         this.directorService = directorService;
+    }
+
+    @Override
+    public List<Film> findTopFilmsByGenresAndYear(Long count, Long genreId, Long year) {
+        return films.values().stream()
+            .filter(film -> film.getReleaseDate().getYear() == year)
+            .filter(film -> film.getGenres().stream().anyMatch(genre -> Objects.equals(genre.getId(), genreId)))
+            .sorted(Comparator.comparingLong(Film::getLikes).reversed())
+            .limit(count)
+            .toList();
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        String lowerQuery = query.toLowerCase();
+
+        return films.values().stream()
+            .filter(film ->
+                (film.getName() != null && film.getName().toLowerCase().contains(lowerQuery))
+                    ||
+                    (film.getDirectors() != null && film.getDirectors().stream()
+                        .anyMatch(d -> d.getName() != null
+                            && d.getName().toLowerCase().contains(lowerQuery)))
+            )
+            .toList();
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String director) {
+        if (director == null || director.isBlank()) {
+            return List.of();
+        }
+
+        String lowerQuery = director.toLowerCase();
+
+        return films.values().stream()
+            .filter(film -> film.getDirectors() != null)
+            .filter(film -> film.getDirectors().stream()
+                .anyMatch(d -> d.getName().toLowerCase().contains(lowerQuery)))
+            .toList();
+    }
+
+    @Override
+    public List<Film> findFilmsByPopular() {
+        return films.values().stream()
+            .sorted(Comparator.comparingLong(Film::getLikes).reversed())
+            .toList();
+    }
+
+    @Override
+    public List<Film> searchFilmBySubstring(String nameFilm) {
+        return films.values().stream()
+            .filter(film -> film.getName().toLowerCase().contains(nameFilm.toLowerCase()))
+            .toList();
     }
 
     @Override
@@ -71,12 +124,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Long filmId, Long userId) {
+    public boolean addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         User user = userService.getUsersById(userId);
 
         film.addLike();
         user.addLikesFilms(filmId);
+        return true;
     }
 
     @Override

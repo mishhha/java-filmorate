@@ -6,7 +6,17 @@ import java.util.List;
 
 public interface FilmStorage {
 
-    public void deleteFilmById(Long filmId);
+    List<Film> findTopFilmsByGenresAndYear(Long count, Long genreId, Long year);
+
+    List<Film> searchFilmsByTitleAndDirector(String query);
+
+    List<Film> searchFilmByDirector(String director);
+
+    List<Film> findFilmsByPopular();
+
+    List<Film> searchFilmBySubstring(String nameFilm);
+
+    void deleteFilmById(Long filmId);
 
     List<Film> getFilms();
 
@@ -18,11 +28,11 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
-    public void addLike(Long filmId, Long userId);
+    boolean addLike(Long filmId, Long userId);
 
-    public void removeLike(Long filmId, Long userId);
+    void removeLike(Long filmId, Long userId);
 
-    public List<Film> getCommonFilms(Long userId, Long friendId);
+    List<Film> getCommonFilms(Long userId, Long friendId);
 
-    public List<Film> getDirectorFilms(Long directorId, String sortBy);
+    List<Film> getDirectorFilms(Long directorId, String sortBy);
 }

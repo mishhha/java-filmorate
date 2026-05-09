@@ -22,6 +22,18 @@ public class FilmController {
 
     private final FilmService filmService;
 
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> searchFilms(
+        @RequestParam (required = false) String query,
+        @RequestParam (required = false) String by
+    ) {
+        if (query == null || query.isBlank()) {
+            return filmService.searchTopFilms();
+        }
+        return filmService.searchFilmBySubstring(query, by);
+    }
+
     @DeleteMapping("/{filmId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteFilmById(@PathVariable @PositiveOrZero Long filmId) {
@@ -60,13 +72,26 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable Long userId) {
         filmService.userDislikesFilm(id, userId);
     }
 
-    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
         return filmService.getTopFilmsByLikes(count);
+    }
+
+    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> findTopFilmsByGenreAndYear(
+        @RequestParam (value = "count", defaultValue = "10") @Positive Long count,
+        @RequestParam (value = "genreId", required = false) @Positive Long genreId,
+        @RequestParam (value = "year", required = false) @Positive Long year
+    ) {
+        if (genreId == null && year == null) {
+            return filmService.getTopFilmsByLikes(count.intValue());
+        }
+            return filmService.searchTopFilmsByGenreAndYear(count, genreId, year);
     }
 
     @GetMapping("/common")

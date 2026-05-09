@@ -14,6 +14,7 @@ public class InMemoryReviewStorage implements ReviewStorage {
 
     private final Map<Long, Review> reviews = new HashMap<>();
 
+
     @Override
     public Review addReview(Review review) {
         review.setReviewId(nextIdGenerate());
