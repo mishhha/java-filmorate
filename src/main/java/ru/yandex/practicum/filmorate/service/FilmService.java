@@ -143,14 +143,14 @@ public class FilmService {
         filmStorage.removeLike(id, userId);
 
         //Добавление события в историю
-        /* userStorage.addEvent(Event.builder()
+        userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.REMOVE)
                 .entityId(id)
                 .build());
 
-         */
+
     }
 
     public List<Film> getTopFilmsByLikes(int count) {
