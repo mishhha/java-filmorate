@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.review;
 
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.review.Reaction;
 import ru.yandex.practicum.filmorate.model.review.Review;
 
 import java.util.ArrayList;
@@ -56,7 +57,12 @@ public class InMemoryReviewStorage implements ReviewStorage {
     }
 
     @Override
-    public void saveReaction(Long reviewId, Long userId, Boolean isPositive) {
+    public Reaction getReaction(Long reviewId, Long userId) {
+        return null;
+    }
+
+    @Override
+    public Long insertReaction(Long reviewId, Long userId, Boolean isPositive) {
         Review review = getReviewById(reviewId);
 
         if (isPositive.equals(true)) {
@@ -64,6 +70,8 @@ public class InMemoryReviewStorage implements ReviewStorage {
         } else {
             review.getReactions().put(userId, (byte) -1);
         }
+
+        return null;
     }
 
     @Override

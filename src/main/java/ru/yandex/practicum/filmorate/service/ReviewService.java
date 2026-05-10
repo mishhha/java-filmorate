@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.review.Reaction;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.EventOperations;
@@ -86,20 +87,20 @@ public class ReviewService {
     }
 
     public void addLike(Long reviewId, Long userId) {
-        reviewStorage.saveReaction(reviewId, userId, true);
+        Long reactionId = reviewStorage.insertReaction(reviewId, userId, true);
 
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.ADD)
-                .entityId(reviewId)
+                .entityId(reactionId)
                 .build());
 
     }
 
     public void addDislike(Long reviewId, Long userId) {
-        reviewStorage.saveReaction(reviewId, userId, false);
+        Long id = reviewStorage.insertReaction(reviewId, userId, false);
 
         //Добавление события в историю
         /*
@@ -113,17 +114,22 @@ public class ReviewService {
     }
 
     public void removeLike(Long reviewId, Long userId) {
+        Reaction reaction = reviewStorage.getReaction(reviewId, userId);
+
         reviewStorage.deleteReaction(reviewId, userId);
+
         //Добавление события в историю
         userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.REMOVE)
-                .entityId(reviewId)
+                .entityId(reaction.getId())
                 .build());
     }
 
     public void removeDislike(Long reviewId, Long userId) {
+        Reaction reaction = reviewStorage.getReaction(reviewId, userId);
+
         reviewStorage.deleteReaction(reviewId, userId);
 
         //Добавление события в историю
