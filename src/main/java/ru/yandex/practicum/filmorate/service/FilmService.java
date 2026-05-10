@@ -125,7 +125,7 @@ public class FilmService {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
 
-        if (filmStorage.addLike(id, userId)) {
+        //if (filmStorage.addLike(id, userId)) {
             //Добавление события в историю
             userStorage.addEvent(Event.builder()
                     .userId(userId)
@@ -133,7 +133,7 @@ public class FilmService {
                     .operation(EventOperations.ADD)
                     .entityId(id)
                     .build());
-        }
+        //}
     }
 
     public void userDislikesFilm(Long id, Long userId) {
