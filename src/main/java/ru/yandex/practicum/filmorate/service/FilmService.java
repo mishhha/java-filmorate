@@ -124,8 +124,9 @@ public class FilmService {
     public void userLikesFilm(Long id, Long userId) {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
+        filmStorage.addLike(id, userId);
 
-        //if (filmStorage.addLike(id, userId)) {
+        //if () {
             //Добавление события в историю
             userStorage.addEvent(Event.builder()
                     .userId(userId)
