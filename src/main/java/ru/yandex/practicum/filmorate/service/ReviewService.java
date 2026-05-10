@@ -90,15 +90,12 @@ public class ReviewService {
         Long reactionId = reviewStorage.insertReaction(reviewId, userId, true);
 
         //Добавление события в историю
-        /*
         userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.ADD)
                 .entityId(reactionId)
                 .build());
-                */
-
     }
 
     public void addDislike(Long reviewId, Long userId) {
@@ -121,14 +118,12 @@ public class ReviewService {
         reviewStorage.deleteReaction(reviewId, userId);
 
         //Добавление события в историю
-        /*
         userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.REMOVE)
                 .entityId(reaction.getId())
                 .build());
-        */
     }
 
     public void removeDislike(Long reviewId, Long userId) {
