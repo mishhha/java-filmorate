@@ -91,15 +91,15 @@ public class FilmService {
         }
         if (film.getDescription() == null || film.getDescription().length() > 200) {
             log.warn(
-                "Превышена длина описания {} при создании.",
-                film.getDescription().length()
+                    "Превышена длина описания {} при создании.",
+                    film.getDescription().length()
             );
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
             log.warn(
-                "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
-                film.getReleaseDate()
+                    "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
+                    film.getReleaseDate()
             );
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
@@ -125,15 +125,15 @@ public class FilmService {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
 
-        if (filmStorage.addLike(id, userId)) {
-            //Добавление события в историю
-            userStorage.addEvent(Event.builder()
+        filmStorage.addLike(id, userId);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
                 .userId(userId)
                 .eventType(EventTypes.LIKE)
                 .operation(EventOperations.ADD)
                 .entityId(id)
                 .build());
-        }
     }
 
     public void userDislikesFilm(Long id, Long userId) {
@@ -149,8 +149,6 @@ public class FilmService {
                 .operation(EventOperations.REMOVE)
                 .entityId(id)
                 .build());
-
-
     }
 
     public List<Film> getTopFilmsByLikes(int count) {
