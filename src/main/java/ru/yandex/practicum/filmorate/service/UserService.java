@@ -71,17 +71,19 @@ public class UserService {
     }
 
     public User addFriend(Long id, Long friendId) {
-        User user = userStorage.addFriend(id, friendId);
+        if (!id.equals(friendId)) {
+            User user = userStorage.addFriend(id, friendId);
 
-        //Добавление события в историю
-        userStorage.addEvent(Event.builder()
-                .userId(id)
-                .eventType(EventTypes.FRIEND)
-                .operation(EventOperations.ADD)
-                .entityId(friendId)
-                .build());
+            //Добавление события в историю
+            userStorage.addEvent(Event.builder()
+                    .userId(id)
+                    .eventType(EventTypes.FRIEND)
+                    .operation(EventOperations.ADD)
+                    .entityId(friendId)
+                    .build());
+        }
 
-        return user;
+        return userStorage.getUserById(id);
     }
 
     public List<User> getCommonFriend(Long id, Long otherId) {
