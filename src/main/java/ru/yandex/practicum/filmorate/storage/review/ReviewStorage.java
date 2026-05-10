@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
-import ru.yandex.practicum.filmorate.model.review.Reaction;
 import ru.yandex.practicum.filmorate.model.review.Review;
 
 import java.util.List;
@@ -17,9 +16,7 @@ public interface ReviewStorage {
 
     List<Review> getReviews();
 
-    Reaction getReaction(Long reviewId, Long userId);
-
-    Long insertReaction(Long reviewId, Long userId, Boolean isPositive);
+    void saveReaction(Long reviewId, Long userId, Boolean isPositive);
 
     void deleteReaction(Long reviewId, Long userId);
 }

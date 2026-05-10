@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,7 +8,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.review.Reaction;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.storage.mappers.ReviewRowMapper;
 
@@ -17,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
-@Slf4j
 @Primary
 @Repository("reviewDbStorage")
 @RequiredArgsConstructor
@@ -49,17 +46,18 @@ public class ReviewDbStorage implements ReviewStorage {
                 SELECT * FROM reviews
             """;
 
-
-    private static final String GET_REACTIONS_BY_REVIEW_ID = """
+    private static final String GET_REACTIONS_BY_ID = """
                 SELECT * FROM reactions WHERE review_id = ?
             """;
 
-    private static final String GET_REACTION = """
-                SELECT * FROM reactions WHERE review_id = ? AND user_id = ?
-            """;
-
-    private static final String INSERT_REACTION = """
-                INSERT INTO reactions (review_id, user_id, reaction) VALUES (?, ?, ?)
+    private static final String MERGE_REACTION = """
+                MERGE INTO reactions AS target
+                USING (VALUES (?, ?, ?)) AS val (review_id, user_id, reaction)
+                ON target.review_id = val.review_id AND target.user_id = val.user_id
+                WHEN MATCHED THEN
+                    UPDATE SET target.reaction = val.reaction
+                WHEN NOT MATCHED THEN
+                    INSERT (review_id, user_id, reaction) VALUES (val.review_id, val.user_id, val.reaction)
             """;
 
     private static final String DELETE_REACTION = """
@@ -119,7 +117,7 @@ public class ReviewDbStorage implements ReviewStorage {
             Review review = jdbc.queryForObject(GET_REVIEW_BY_ID, reviewRowMapper, id);
 
             //Реакции
-            jdbc.query(GET_REACTIONS_BY_REVIEW_ID, rs -> {
+            jdbc.query(GET_REACTIONS_BY_ID, rs -> {
                 review.getReactions().put(rs.getLong("user_id"),
                         rs.getByte("reaction"));
             }, id);
@@ -137,7 +135,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
         for (Review review : reviews) {
             //Реакции
-            jdbc.query(GET_REACTIONS_BY_REVIEW_ID, rs -> {
+            jdbc.query(GET_REACTIONS_BY_ID, rs -> {
                 review.getReactions().put(rs.getLong("user_id"),
                         rs.getByte("reaction"));
 
@@ -148,49 +146,29 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Reaction getReaction(Long reviewId, Long userId) {
-        try {
-            //Реакции
-            return jdbc.query(GET_REACTION, rs -> {
-                return Reaction.builder()
-                        .id(rs.getLong("id"))
-                        .reviewId(rs.getLong("review_id"))
-                        .userId(rs.getLong("user_id"))
-                        .reaction(rs.getByte("reaction"))
-                        .build();
-            }, reviewId, userId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Реакция не найден");
-        }
-    }
-
-    @Override
-    public Long insertReaction(Long reviewId, Long userId, Boolean isPositive) {
-
-        try {
-            deleteReaction(reviewId, userId);
-        } catch (Exception e) {
-            log.info("Реакция не существует");
-        }
+    public void saveReaction(Long reviewId, Long userId, Boolean isPositive) {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    INSERT_REACTION, Statement.RETURN_GENERATED_KEYS
+                    MERGE_REACTION, Statement.RETURN_GENERATED_KEYS
             );
             ps.setLong(1, reviewId);
             ps.setLong(2, userId);
             ps.setLong(3, isPositive.equals(true) ? 1 : -1);
             return ps;
         }, keyHolder);
-
-        return keyHolder.getKey().longValue();
     }
 
     @Override
     public void deleteReaction(Long reviewId, Long userId) {
-        Reaction reaction = getReaction(reviewId, userId);
+
+
+        boolean check = jdbc.queryForObject(CHECK_REACTION_EXISTS_BY_ID, Boolean.class, reviewId, userId);
+        if (!check) {
+            throw new NotFoundException(String.format("Реакция пользователя %s к отзыву %s не найдена", userId, reviewId));
+        }
 
         jdbc.update(DELETE_REACTION, reviewId, userId);
     }
