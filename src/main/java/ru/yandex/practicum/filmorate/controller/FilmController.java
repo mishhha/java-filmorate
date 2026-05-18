@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -19,8 +20,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
 
-    @Autowired
     private final FilmService filmService;
+
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> searchFilms(
+        @RequestParam (required = false) String query,
+        @RequestParam (required = false) String by
+    ) {
+        if (query == null || query.isBlank()) {
+            return filmService.searchTopFilms();
+        }
+        return filmService.searchFilmBySubstring(query, by);
+    }
+
+    @DeleteMapping("/{filmId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteFilmById(@PathVariable @PositiveOrZero Long filmId) {
+        filmService.deleteFilmById(filmId);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -54,13 +72,40 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long userId) {
+    public void disLike(@PathVariable @PositiveOrZero Long id, @PathVariable Long userId) {
         filmService.userDislikesFilm(id, userId);
     }
 
-    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> topFilmsByLikes(@RequestParam(defaultValue = "10") @PositiveOrZero int count) {
         return filmService.getTopFilmsByLikes(count);
     }
 
+    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> findTopFilmsByGenreAndYear(
+        @RequestParam (value = "count", defaultValue = "10") @Positive Long count,
+        @RequestParam (value = "genreId", required = false) @Positive Long genreId,
+        @RequestParam (value = "year", required = false) @Positive Long year
+    ) {
+        if (genreId == null && year == null) {
+            return filmService.getTopFilmsByLikes(count.intValue());
+        }
+            return filmService.searchTopFilmsByGenreAndYear(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getCommonFilms(@RequestParam @Positive Long userId, @RequestParam @Positive Long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getDirectorFilms(@PathVariable @Positive Long directorId, @RequestParam String sortBy) {
+        if (!List.of("likes", "year").contains(sortBy.toLowerCase())) {
+            throw new ValidationException("некорректный параметр сортировки. Доступны: likes, year");
+        }
+        return filmService.getDirectorFilms(directorId, sortBy);
+    }
 }

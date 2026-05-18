@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.user.Event;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -18,6 +20,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUserById(@PathVariable @PositiveOrZero Long userId) {
+        userService.deleteUserById(userId);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -57,7 +65,7 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
-    public User addFriend(@PathVariable @PositiveOrZero Long id, @PathVariable @PositiveOrZero Long friendId) {
+    public User addFriend(@PathVariable @PositiveOrZero Long id, @PathVariable Long friendId) {
         return userService.addFriend(id, friendId);
     }
 
@@ -68,6 +76,22 @@ public class UserController {
         @PathVariable @PositiveOrZero Long otherId
     ) {
         return userService.getCommonFriend(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getRecommendations(
+            @PathVariable @PositiveOrZero Long id
+    ) {
+        return userService.getRecommendations(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Event> getEventList(
+            @PathVariable @PositiveOrZero Long id
+    ) {
+        return userService.getEventList(id);
     }
 
 }

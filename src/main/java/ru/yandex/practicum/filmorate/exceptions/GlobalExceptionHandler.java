@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.controller.ErrorHandler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class GlobalExceptionHandler {
     public ErrorHandler.ErrorResponse handlerServerException(final Throwable e) {
         log.error("Необработанное исключение", e);
         return new ErrorHandler.ErrorResponse(
-            "Произошла непредвиденная ошибка."
+            "Произошла непредвиденная ошибка." + Arrays.toString(e.getStackTrace())
         );
     }
 

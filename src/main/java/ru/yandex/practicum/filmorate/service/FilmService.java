@@ -6,14 +6,17 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.user.Event;
+import ru.yandex.practicum.filmorate.model.user.EventOperations;
+import ru.yandex.practicum.filmorate.model.user.EventTypes;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
 @Slf4j
+@Service
 public class FilmService {
 
     private final FilmStorage filmStorage;
@@ -25,6 +28,54 @@ public class FilmService {
                        @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+    }
+
+    public List<Film> searchTopFilmsByGenreAndYear(Long count, Long genre, Long year) {
+        if (year != null && year < MIN_DATE_RELEASE.getYear()) {
+            return List.of();
+        }
+        return filmStorage.findTopFilmsByGenresAndYear(count, genre, year);
+    }
+
+    public List<Film> searchTopFilms() {
+        return filmStorage.findFilmsByPopular();
+    }
+
+    public List<Film> searchFilmBySubstring(String query, String by) {
+
+        List<Film> searchFilms = List.of();
+
+        if (by == null || by.isBlank()) {
+            searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
+        } else {
+            String[] split = by.split(",");
+            boolean title = false;
+            boolean director = false;
+
+            for (String search : split) {
+                if (search.trim().equalsIgnoreCase("title")) {
+                    title = true;
+                } else if (search.trim().equalsIgnoreCase("director")) {
+                    director = true;
+                } else {
+                    throw new ValidationException("Указаны неверные параметры поиска" + search);
+                }
+            }
+
+            if (title && director) {
+                searchFilms = filmStorage.searchFilmsByTitleAndDirector(query);
+            } else if (title) {
+                searchFilms = filmStorage.searchFilmBySubstring(query);
+            } else if (director) {
+                searchFilms = filmStorage.searchFilmByDirector(query);
+            }
+        }
+
+        return searchFilms;
+    }
+
+    public void deleteFilmById(Long filmId) {
+        filmStorage.deleteFilmById(filmId);
     }
 
     public Film addFilm(Film film) {
@@ -40,15 +91,15 @@ public class FilmService {
         }
         if (film.getDescription() == null || film.getDescription().length() > 200) {
             log.warn(
-                "Превышена длина описания {} при создании.",
-                film.getDescription().length()
+                    "Превышена длина описания {} при создании.",
+                    film.getDescription().length()
             );
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
         if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_DATE_RELEASE)) {
             log.warn(
-                "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
-                film.getReleaseDate()
+                    "Указана неверная дата релиза, при создании, дата раньше допустимого значения {}",
+                    film.getReleaseDate()
             );
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
@@ -73,8 +124,15 @@ public class FilmService {
     public void userLikesFilm(Long id, Long userId) {
         filmStorage.getFilmById(id);
         userStorage.getUserById(userId);
-
         filmStorage.addLike(id, userId);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.LIKE)
+                .operation(EventOperations.ADD)
+                .entityId(id)
+                .build());
     }
 
     public void userDislikesFilm(Long id, Long userId) {
@@ -82,10 +140,25 @@ public class FilmService {
         userStorage.getUserById(userId);
 
         filmStorage.removeLike(id, userId);
+
+        //Добавление события в историю
+        userStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventTypes.LIKE)
+                .operation(EventOperations.REMOVE)
+                .entityId(id)
+                .build());
     }
 
     public List<Film> getTopFilmsByLikes(int count) {
         return filmStorage.getTopFilms(count);
     }
 
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    public List<Film> getDirectorFilms(Long directorId, String sortBy) {
+        return filmStorage.getDirectorFilms(directorId, sortBy);
+    }
 }
